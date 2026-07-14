@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Management Console — B3 Platform Support Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   B3 DESIGN TOKENS — identical to Surface 1
+═══════════════════════════════════════════ */
+:root {
+  --teal-50:  #F0FDFA; --teal-100: #CCFBF1; --teal-200: #99F6E4;
+  --teal-300: #5EEAD4; --teal-400: #2DD4BF; --teal-500: #14B8A6;
+  --teal-600: #0D9488; --teal-700: #0F766E; --teal-800: #115E59; --teal-900: #134E4A;
+  --sky-100:  #E0F2FE; --sky-600:  #0284C7;
+  --sl-50:#F8FAFC; --sl-100:#F1F5F9; --sl-200:#E2E8F0; --sl-300:#CBD5E1;
+  --sl-400:#94A3B8; --sl-500:#64748B; --sl-600:#475569; --sl-700:#334155;
+  --sl-800:#1E293B; --sl-900:#0F172A;
+  --ok:#0D9488; --ok-bg:#CCFBF1; --ok-bdr:#99F6E4;
+  --warn:#D97706; --warn-bg:#FEF3C7; --warn-bdr:#FCD34D;
+  --crit:#DC2626; --crit-bg:#FEE2E2; --crit-bdr:#FCA5A5;
+  --info:#0284C7; --info-bg:#E0F2FE; --info-bdr:#7DD3FC;
+  --purple:#7C3AED; --purple-bg:#EDE9FE;
+  --amber:#D97706; --amber-bg:#FEF3C7;
+  --topbar-h:56px; --sidebar-w:220px;
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+  --shadow-sm:0 1px 3px rgba(15,118,110,.08),0 1px 2px rgba(15,118,110,.06);
+  --shadow-md:0 4px 16px rgba(15,118,110,.10);
+  --shadow-lg:0 12px 40px rgba(15,118,110,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--teal-50);color:var(--sl-800);font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ═══════ TOPBAR ═══════ */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:var(--teal-900);display:flex;align-items:center;padding:0 0 0 16px;z-index:200;box-shadow:0 2px 0 rgba(0,0,0,.18),0 4px 16px rgba(0,0,0,.14)}
+.tb-logo{display:flex;align-items:center;gap:9px;color:#fff;font-size:14.5px;font-weight:700;letter-spacing:-.01em;flex-shrink:0;text-decoration:none;padding-right:16px;border-right:1px solid rgba(255,255,255,.15)}
+.tb-logo-icon{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.tb-bundle{margin-left:14px;background:var(--teal-600);color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.tb-breadcrumb{margin-left:14px;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.65);font-size:12.5px}
+.tb-breadcrumb .sep{opacity:.4}
+.tb-breadcrumb .current{color:#fff;font-weight:600}
+.tb-services{display:flex;gap:5px;margin-left:auto;padding:0 14px}
+.svc-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.10);color:rgba(255,255,255,.85);font-size:11px;font-weight:500;padding:3px 9px 3px 7px;border-radius:20px;border:1px solid rgba(255,255,255,.15);cursor:pointer;transition:background .15s;white-space:nowrap}
+.svc-pill:hover{background:rgba(255,255,255,.18)}
+.svc-pill.active{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.35)}
+.svc-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
+.svc-dot.warn{background:#fbbf24}
+.svc-dot.crit{background:#f87171;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pulse-ok{0%,100%{opacity:1}50%{opacity:.5}}
+.svc-dot.ok{animation:pulse-ok 2.5s infinite}
+.tb-right{display:flex;align-items:center;gap:8px;padding:0 14px;border-left:1px solid rgba(255,255,255,.12)}
+.tb-icon-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.10);border:none;color:rgba(255,255,255,.85);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;position:relative;flex-shrink:0}
+.tb-icon-btn:hover{background:rgba(255,255,255,.20)}
+.tb-notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#f87171;border-radius:50%;border:2px solid var(--teal-900)}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal-500);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.25);flex-shrink:0}
+
+/* ═══════ SHELL ═══════ */
+.shell{display:flex;padding-top:var(--topbar-h);min-height:100vh}
+
+/* ═══════ SIDEBAR ═══════ */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--sl-200);position:fixed;top:var(--topbar-h);bottom:0;left:0;overflow-y:auto;padding:16px 0 24px;z-index:100}
+.sb-group-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sl-400);padding:14px 16px 5px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 16px;color:var(--sl-600);font-size:13px;font-weight:500;cursor:pointer;border-left:3px solid transparent;transition:all .12s;text-decoration:none}
+.sb-item:hover{background:var(--teal-50);color:var(--teal-700)}
+.sb-item.active{background:var(--teal-50);color:var(--teal-700);border-left-color:var(--teal-600);font-weight:600}
+.sb-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sb-badge.crit{background:var(--crit-bg);color:var(--crit)}
+.sb-badge.ok{background:var(--ok-bg);color:var(--ok)}
+.sb-badge.warn{background:var(--warn-bg);color:var(--warn)}
+.sb-divider{height:1px;background:var(--sl-100);margin:8px 16px}
+
+/* ═══════ MAIN ═══════ */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* ═══════ HERO — light, same as S1 ═══════ */
+.page-hero{background:linear-gradient(180deg,#ffffff 0%,#f4fdfb 55%,var(--teal-50) 100%);border-bottom:1px solid var(--teal-100);padding:20px 28px 0;position:relative}
+.page-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal-700) 0%,var(--teal-400) 55%,transparent 100%);pointer-events:none}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;padding-top:6px}
+.hero-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-600);margin-bottom:4px}
+.hero-title{font-size:21px;font-weight:800;color:var(--teal-900);letter-spacing:-.02em;margin-bottom:3px}
+.hero-desc{font-size:12.5px;color:var(--sl-500);max-width:520px}
+.hero-actions{display:flex;gap:8px;flex-shrink:0;align-items:flex-start}
+
+/* ═══════ TAB BAR ═══════ */
+.tab-bar{display:flex;gap:0;background:rgba(13,148,136,.06);border-top:1px solid var(--teal-100);margin:0 -28px;overflow-x:auto;padding:0 28px}
+.tab-bar::-webkit-scrollbar{height:0}
+.tab-item{display:flex;align-items:center;gap:7px;padding:11px 16px 10px;font-size:12.5px;font-weight:500;color:var(--sl-500);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;flex-shrink:0;text-decoration:none}
+.tab-item:hover{color:var(--teal-700);background:rgba(13,148,136,.04)}
+.tab-item.active{color:var(--teal-700);border-bottom-color:var(--teal-600);font-weight:700;background:transparent}
+.tab-icon{font-size:14px}
+.tab-badge{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:8px}
+.tab-badge.crit{background:var(--crit-bg);color:var(--crit)}
+.tab-badge.warn{background:var(--warn-bg);color:var(--warn)}
+.tab-badge.ok{background:var(--ok-bg);color:var(--ok)}
+
+/* ═══════ PAGE BODY ═══════ */
+.page-body{padding:20px 24px;flex:1}
+
+/* ═══════ SHARED COMPONENTS ═══════ */
+.btn{display:inline-flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;padding:7px 13px;border-radius:var(--r-sm);border:1px solid transparent;cursor:pointer;transition:all .14s;white-space:nowrap;line-height:1}
+.btn-primary{background:var(--teal-600);color:#fff;border-color:var(--teal-600)}
+.btn-primary:hover{background:var(--teal-700)}
+.btn-secondary{background:#fff;color:var(--sl-700);border-color:var(--sl-200)}
+.btn-secondary:hover{background:var(--sl-50);border-color:var(--sl-300)}
+.btn-ghost{background:transparent;color:var(--teal-700);border-color:transparent}
+.btn-ghost:hover{background:var(--teal-50)}
+.btn-danger{background:var(--crit-bg);color:var(--crit);border-color:var(--crit-bdr)}
+.btn-danger:hover{background:#fee2e2}
+.btn-warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-bdr)}
+.btn-sm{padding:5px 10px;font-size:11.5px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:10px;white-space:nowrap}
+.badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-ok{background:var(--ok-bg);color:var(--ok)}
+.badge-warn{background:var(--warn-bg);color:var(--warn)}
+.badge-crit{background:var(--crit-bg);color:var(--crit)}
+.badge-info{background:var(--info-bg);color:var(--info)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-slate{background:var(--sl-100);color:var(--sl-600)}
+
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal-700);background:var(--teal-50);padding:2px 5px;border-radius:4px;font-weight:500}
+
+.card{background:#fff;border:1px solid var(--sl-200);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--sl-100)}
+.card-title{font-size:13.5px;font-weight:700;color:var(--teal-900)}
+.card-sub{font-size:11px;color:var(--sl-400);margin-top:1px}
+.card-body{padding:16px}
+.card-actions{display:flex;gap:7px}
+
+table.dt{width:100%;border-collapse:collapse}
+table.dt thead{background:var(--sl-50);border-bottom:1px solid var(--sl-200)}
+table.dt th{padding:9px 12px;text-align:left;font-size:10.5px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;user-select:none;cursor:pointer}
+table.dt th:hover{color:var(--teal-700)}
+table.dt td{padding:10px 12px;font-size:12.5px;color:var(--sl-700);border-bottom:1px solid var(--sl-100);vertical-align:middle}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr.clickable{cursor:pointer;transition:background .1s}
+table.dt tr.clickable:hover td{background:var(--teal-50)}
+
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--sl-700);margin-bottom:4px}
+.form-hint{font-size:11px;color:var(--sl-400);margin-top:3px}
+.form-input{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--sl-800);background:#fff;border:1px solid var(--sl-300);border-radius:var(--r-sm);padding:8px 11px;outline:none;transition:border-color .15s,box-shadow .15s}
+.form-input:focus{border-color:var(--teal-400);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.form-input::placeholder{color:var(--sl-400)}
+.form-group{margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-req{color:var(--crit);margin-left:2px}
+
+/* ═══════ OVERVIEW — SERVICE CARDS ═══════ */
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:20px}
+.svc-card{background:#fff;border:1px solid var(--sl-200);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .1s}
+.svc-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r-lg) var(--r-lg) 0 0}
+.svc-card.ok::before{background:var(--ok)}
+.svc-card.warn::before{background:var(--warn)}
+.svc-card.crit::before{background:var(--crit)}
+.svc-card.info::before{background:var(--info)}
+.svc-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.svc-card-name{font-size:11px;font-weight:700;color:var(--sl-500);text-transform:uppercase;letter-spacing:.08em}
+.svc-card-icon{font-size:18px;opacity:.7}
+.svc-card-metric{font-size:28px;font-weight:800;color:var(--teal-900);letter-spacing:-.02em;line-height:1;margin-bottom:3px}
+.svc-card-metric.warn{color:var(--warn)}
+.svc-card-metric.crit{color:var(--crit)}
+.svc-card-label{font-size:11.5px;color:var(--sl-500)}
+.svc-card-sub{font-size:10.5px;color:var(--sl-400);margin-top:5px;display:flex;align-items:center;gap:5px}
+.svc-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.svc-status-dot.ok{background:var(--ok);animation:pulse-ok 2s infinite}
+.svc-status-dot.warn{background:var(--warn)}
+.svc-status-dot.crit{background:var(--crit);animation:blink 1s infinite}
+
+/* Mini sparkline bar */
+.sparkbar{display:flex;align-items:flex-end;gap:2px;height:28px;margin-top:8px}
+.spark{flex:1;background:var(--teal-200);border-radius:2px;min-height:4px;transition:background .15s}
+.svc-card:hover .spark{background:var(--teal-300)}
+.spark.high{background:var(--teal-500)}
+.spark.peak{background:var(--teal-600)}
+.spark.warn{background:var(--warn-bg)}
+.spark.crit{background:var(--crit-bg)}
+
+/* ═══════ ACTIVITY FEED ═══════ */
+.activity-item{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--sl-100)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:3px}
+.activity-dot{width:9px;height:9px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px var(--sl-200)}
+.activity-dot.ok{background:var(--ok);box-shadow:0 0 0 2px var(--ok-bdr)}
+.activity-dot.warn{background:var(--warn);box-shadow:0 0 0 2px var(--warn-bdr)}
+.activity-dot.crit{background:var(--crit);box-shadow:0 0 0 2px var(--crit-bdr)}
+.activity-dot.info{background:var(--info);box-shadow:0 0 0 2px var(--info-bdr)}
+.activity-line{width:1px;flex:1;background:var(--sl-100);margin-top:4px}
+.activity-content{flex:1;min-width:0}
+.activity-title{font-size:12.5px;font-weight:600;color:var(--sl-800);margin-bottom:1px}
+.activity-sub{font-size:11.5px;color:var(--sl-400)}
+.activity-time{font-size:10.5px;color:var(--sl-400);white-space:nowrap;flex-shrink:0;font-family:'JetBrains Mono',monospace;padding-top:3px}
+
+/* ═══════ CERTIFICATE TAB ═══════ */
+.expiry-bar{height:4px;border-radius:2px;background:var(--sl-100);overflow:hidden;margin-top:4px}
+.expiry-fill{height:100%;border-radius:2px}
+.expiry-fill.ok{background:var(--ok)}
+.expiry-fill.warn{background:var(--warn)}
+.expiry-fill.crit{background:var(--crit)}
+
+/* ═══════ USER MANAGEMENT TAB ═══════ */
+.avatar-sm{width:28px;height:28px;border-radius:50%;background:var(--teal-600);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.avatar-sm.admin{background:var(--purple)}
+.avatar-sm.readonly{background:var(--sl-400)}
+
+/* ═══════ SIEM RULES TAB ═══════ */
+.rule-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--sl-100)}
+.rule-row:last-child{border-bottom:none}
+.rule-row:hover{background:var(--teal-50)}
+.toggle{position:relative;width:34px;height:18px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:var(--sl-300);border-radius:9px;cursor:pointer;transition:background .2s}
+.toggle input:checked+.toggle-track{background:var(--teal-600)}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.toggle input:checked~.toggle-thumb{transform:translateX(16px)}
+
+/* ═══════ OPENSEARCH TAB ═══════ */
+.index-bar{height:6px;border-radius:3px;background:var(--sl-100);overflow:hidden;width:100%;margin-top:3px}
+.index-fill{height:100%;border-radius:3px;background:var(--teal-500)}
+.index-fill.warn{background:var(--warn)}
+.index-fill.crit{background:var(--crit)}
+
+/* ═══════ ALERT CONFIG TAB ═══════ */
+.severity-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.severity-dot.crit{background:var(--crit)}
+.severity-dot.warn{background:var(--warn)}
+.severity-dot.ok{background:var(--ok)}
+.severity-dot.info{background:var(--info)}
+
+/* ═══════ TOAST ═══════ */
+.toast{position:fixed;bottom:24px;left:calc(var(--sidebar-w) + 50%);transform:translateX(-50%) translateY(80px);background:var(--sl-900);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:var(--r-md);box-shadow:var(--shadow-lg);z-index:999;transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:9px;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.toast-dot.warn{background:#fbbf24}
+.toast-dot.crit{background:#f87171}
+
+/* ═══════ MODAL ═══════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:480px;max-width:95vw;overflow:hidden}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--sl-100);background:var(--teal-50)}
+.modal-title{font-size:14.5px;font-weight:700;color:var(--teal-900)}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--sl-200);background:#fff;color:var(--sl-500);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.modal-close:hover{background:var(--crit-bg);color:var(--crit);border-color:var(--crit-bdr)}
+.modal-body{padding:20px 18px}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--sl-100);background:var(--sl-50);display:flex;justify-content:flex-end;gap:8px}
+
+/* ═══════ SEARCH BAR ═══════ */
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:340px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sl-400);font-size:13px;pointer-events:none}
+.search-input{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--sl-800);background:var(--sl-50);border:1px solid var(--sl-200);border-radius:var(--r-sm);padding:7px 10px 7px 30px;outline:none;transition:border-color .15s,box-shadow .15s}
+.search-input:focus{border-color:var(--teal-400);box-shadow:0 0 0 3px rgba(13,148,136,.12);background:#fff}
+.search-input::placeholder{color:var(--sl-400)}
+
+/* ═══════ ALERT BANNER ═══════ */
+.alert-banner{display:flex;gap:10px;padding:10px 14px;border-radius:var(--r-sm);margin-bottom:16px;font-size:12.5px;border:1px solid transparent;align-items:flex-start}
+.alert-banner.warn{background:var(--warn-bg);color:#92400E;border-color:var(--warn-bdr)}
+.alert-banner.crit{background:var(--crit-bg);color:#991B1B;border-color:var(--crit-bdr)}
+.alert-banner.ok{background:var(--ok-bg);color:#065F46;border-color:var(--ok-bdr)}
+.alert-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.alert-title{font-weight:700;margin-bottom:1px}
+
+/* ═══════ UX IMPROVEMENTS ═══════ */
+
+/* 1. Max-width cap on page body — prevents uncomfortable stretch on wide viewports */
+.page-body { padding: 20px 24px; flex: 1; max-width: 1400px; }
+
+/* 2. Clickable service cards — pointer + arrow affordance */
+.svc-card.clickable { cursor: pointer; }
+.svc-card-arrow {
+  position: absolute;
+  bottom: 12px; right: 14px;
+  font-size: 12px;
+  color: var(--sl-300);
+  transition: color .15s, transform .15s;
+}
+.svc-card:hover .svc-card-arrow { color: var(--teal-600); transform: translateX(3px); }
+
+/* 3. Non-clickable service cards — no pointer */
+.svc-card.no-click { cursor: default; }
+.svc-card.no-click:hover { box-shadow: var(--shadow-sm); transform: none; }
+
+/* 4. Empty state for tables */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--sl-400);
+  display: none;
+}
+.empty-state.visible { display: block; }
+.empty-state-icon { font-size: 28px; margin-bottom: 10px; }
+.empty-state-title { font-size: 14px; font-weight: 600; color: var(--sl-600); margin-bottom: 4px; }
+.empty-state-sub { font-size: 12.5px; }
+
+/* 5. Tab keyboard focus */
+.tab-item:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: -2px;
+  border-radius: 4px 4px 0 0;
+}
+
+/* 6. Confirm guard overlay (inline, lightweight) */
+.confirm-guard {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.5);
+  z-index: 400;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.confirm-guard.open { display: flex; }
+.confirm-box {
+  background: #fff;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  width: 380px;
+  max-width: 95vw;
+  overflow: hidden;
+}
+.confirm-box-header {
+  padding: 14px 16px;
+  background: var(--crit-bg);
+  border-bottom: 1px solid var(--crit-bdr);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.confirm-box-title { font-size: 14px; font-weight: 700; color: var(--crit); }
+.confirm-box-body { padding: 16px; font-size: 13px; color: var(--sl-700); line-height: 1.6; }
+.confirm-box-footer { padding: 12px 16px; border-top: 1px solid var(--sl-100); background: var(--sl-50); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* 7. Context CTA in hero changes per tab */
+.hero-cta { transition: opacity .15s; }
+
+/* 8. Modal validation — required field shake */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-4px); }
+  40%,80% { transform: translateX(4px); }
+}
+.form-input.invalid {
+  border-color: var(--crit);
+  box-shadow: 0 0 0 3px rgba(220,38,38,.12);
+  animation: shake .35s ease;
+}
+.form-error-msg {
+  font-size: 11px;
+  color: var(--crit);
+  margin-top: 3px;
+  display: none;
+}
+.form-error-msg.visible { display: block; }
+
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.tb-services{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--sl-300);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--sl-400)}
+:focus-visible{outline:2px solid var(--teal-500);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<!-- ═══════ TOP BAR ═══════ -->
+<nav class="topbar">
+  <a class="tb-logo" href="b3-surface1-audit-review.html">
+    <div class="tb-logo-icon">🛡</div>B3 Platform
+  </a>
+  <span class="tb-bundle">Bundle 3</span>
+  <div class="tb-breadcrumb">
+    <span>Platform</span><span class="sep">/</span>
+    <span class="current">Management Console</span>
+  </div>
+  <div class="tb-services">
+    <span class="svc-pill"><span class="svc-dot ok"></span>PKI</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>APM</span>
+    <span class="svc-pill"><span class="svc-dot warn"></span>SIEM</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>Audit</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>NTP</span>
+  </div>
+  <div class="tb-right">
+    <button class="tb-icon-btn">🔔<span class="tb-notif-dot"></span></button>
+    <button class="tb-icon-btn">📄</button>
+    <button class="tb-icon-btn">⚙</button>
+    <div class="tb-avatar" title="MoH ICT Admin — Roshan J.">RJ</div>
+  </div>
+</nav>
+
+<!-- ═══════ SHELL ═══════ -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-group-label">Platform</div>
+    <a class="sb-item" href="b3-surface1-audit-review.html"><span class="sb-icon">📊</span>Overview</a>
+    <a class="sb-item" href="b3-surface1-audit-review.html"><span class="sb-icon">🔍</span>Audit Review<span class="sb-badge crit">2</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">🔐</span>Certificates<span class="sb-badge warn">3</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">🚨</span>SIEM Alerts<span class="sb-badge crit">14</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">📈</span>APM Dashboards</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🕐</span>NTP Monitor</a>
+    <div class="sb-divider"></div>
+    <div class="sb-group-label">Onboarding</div>
+    <a class="sb-item" href="#"><span class="sb-icon">🏥</span>Facilities<span class="sb-badge warn">1</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">➕</span>Register Facility</a>
+    <div class="sb-divider"></div>
+    <div class="sb-group-label">Admin</div>
+    <a class="sb-item active" href="#"><span class="sb-icon">⚙</span>Management Console</a>
+    <a class="sb-item" href="#"><span class="sb-icon">👥</span>User Management</a>
+    <a class="sb-item" href="#"><span class="sb-icon">📋</span>Compliance Reports</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🔑</span>Roles & Permissions</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="page-hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-eyebrow">D28 Management APIs · D7 IP Handover · D29 Operational Readiness</div>
+          <div class="hero-title">Management Console</div>
+          <div class="hero-desc">Operate all five B3 platform services — PKI, APM, SIEM, Audit Repository, and NTP. Every action performed here is logged as a FHIR AuditEvent (AR-01). Blueprint §6.2.</div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-secondary" onclick="toast('Generating operational readiness report…','ok')">📄 Ops Report</button>
+          <button class="btn btn-primary hero-cta" id="heroCta" onclick="openModal('issueModal')">+ Issue Certificate</button>
+        </div>
+      </div>
+
+      <!-- TAB BAR -->
+      <div class="tab-bar">
+        <a class="tab-item active" onclick="switchTab('overview',this)"><span class="tab-icon">📊</span>Overview</a>
+        <a class="tab-item" onclick="switchTab('pki',this)"><span class="tab-icon">🔐</span>PKI Certificates<span class="tab-badge warn">3</span></a>
+        <a class="tab-item" onclick="switchTab('users',this)"><span class="tab-icon">👥</span>User Management</a>
+        <a class="tab-item" onclick="switchTab('alerts',this)"><span class="tab-icon">🔔</span>Alert Config</a>
+        <a class="tab-item" onclick="switchTab('siem',this)"><span class="tab-icon">🚨</span>SIEM Rules<span class="tab-badge crit">14</span></a>
+        <a class="tab-item" onclick="switchTab('opensearch',this)"><span class="tab-icon">🗄</span>OpenSearch Indexes</a>
+        <a class="tab-item" onclick="switchTab('audittrail',this)"><span class="tab-icon">📋</span>Console Audit Trail</a>
+      </div>
+    </div>
+
+    <!-- ═════════════════════════════════
+         TAB PANELS
+    ═════════════════════════════════ -->
+    <div class="page-body">
+
+      <!-- ── OVERVIEW ── -->
+      <div id="tab-overview">
+
+        <div class="alert-banner warn">
+          <span class="alert-icon">⚠</span>
+          <div><div class="alert-title">3 certificates expiring within 14 days — action required</div>MoH-Cert-PKI-0047 · MoH-Cert-PKI-0052 · MoH-Cert-PKI-0061 expire before 26 Jul 2026. Renew via the PKI Certificates tab.</div>
+          <button class="btn btn-warn btn-sm" style="margin-left:auto;flex-shrink:0" onclick="switchTabById('pki')">Renew →</button>
+        </div>
+
+        <!-- 5 Service Cards -->
+        <div class="svc-grid">
+          <!-- PKI -->
+          <div class="svc-card warn clickable" onclick="switchTab('pki', document.querySelectorAll('.tab-item')[1])">
+            <div class="svc-card-top"><div class="svc-card-name">PKI / Certificates</div><div class="svc-card-icon">🔐</div></div>
+            <div class="svc-card-metric">247</div>
+            <div class="svc-card-label">Active certificates</div>
+            <div class="svc-card-sub"><span class="svc-status-dot warn"></span><span style="color:var(--warn);font-weight:600;">3 expiring ≤14d</span></div>
+            <div class="sparkbar"><div class="spark" style="height:40%"></div><div class="spark" style="height:55%"></div><div class="spark" style="height:60%"></div><div class="spark" style="height:50%"></div><div class="spark high" style="height:75%"></div><div class="spark high" style="height:80%"></div><div class="spark peak" style="height:100%"></div></div>
+            <div class="svc-card-arrow">→</div>
+          </div>
+          <!-- APM -->
+          <div class="svc-card ok no-click">
+            <div class="svc-card-top"><div class="svc-card-name">APM / Prometheus</div><div class="svc-card-icon">📈</div></div>
+            <div class="svc-card-metric">99.97%</div>
+            <div class="svc-card-label">Uptime (30d rolling)</div>
+            <div class="svc-card-sub"><span class="svc-status-dot ok"></span>5 Grafana dashboards live · D31</div>
+            <div class="sparkbar"><div class="spark peak" style="height:90%"></div><div class="spark peak" style="height:95%"></div><div class="spark high" style="height:80%"></div><div class="spark peak" style="height:95%"></div><div class="spark peak" style="height:100%"></div><div class="spark peak" style="height:98%"></div><div class="spark peak" style="height:100%"></div></div>
+          </div>
+          <!-- SIEM -->
+          <div class="svc-card crit clickable" onclick="switchTab('siem', document.querySelectorAll('.tab-item')[4])">
+            <div class="svc-card-top"><div class="svc-card-name">SIEM / Wazuh</div><div class="svc-card-icon">🚨</div></div>
+            <div class="svc-card-metric crit">14</div>
+            <div class="svc-card-label">Active alerts (24h)</div>
+            <div class="svc-card-sub"><span class="svc-status-dot crit"></span><span style="color:var(--crit);font-weight:600;">2 unacknowledged</span></div>
+            <div class="sparkbar"><div class="spark" style="height:30%"></div><div class="spark warn" style="height:55%"></div><div class="spark warn" style="height:60%"></div><div class="spark crit" style="height:90%"></div><div class="spark crit" style="height:100%"></div><div class="spark warn" style="height:70%"></div><div class="spark crit" style="height:85%"></div></div>
+            <div class="svc-card-arrow">→</div>
+          </div>
+          <!-- Audit Repo -->
+          <div class="svc-card ok no-click">
+            <div class="svc-card-top"><div class="svc-card-name">Audit Repository</div><div class="svc-card-icon">📋</div></div>
+            <div class="svc-card-metric">1,842</div>
+            <div class="svc-card-label">Events today</div>
+            <div class="svc-card-sub"><span class="svc-status-dot ok"></span>SHA-256 chain intact · 0 gaps</div>
+            <div class="sparkbar"><div class="spark" style="height:45%"></div><div class="spark" style="height:50%"></div><div class="spark high" style="height:70%"></div><div class="spark" style="height:55%"></div><div class="spark high" style="height:80%"></div><div class="spark" style="height:60%"></div><div class="spark peak" style="height:100%"></div></div>
+          </div>
+          <!-- NTP -->
+          <div class="svc-card ok no-click">
+            <div class="svc-card-top"><div class="svc-card-name">NTP / Timekeeping</div><div class="svc-card-icon">🕐</div></div>
+            <div class="svc-card-metric">14/14</div>
+            <div class="svc-card-label">Facilities synced</div>
+            <div class="svc-card-sub"><span class="svc-status-dot ok"></span>Max drift: +12ms · TKS-34 ✓</div>
+            <div class="sparkbar"><div class="spark peak" style="height:95%"></div><div class="spark peak" style="height:100%"></div><div class="spark peak" style="height:98%"></div><div class="spark peak" style="height:100%"></div><div class="spark peak" style="height:95%"></div><div class="spark peak" style="height:100%"></div><div class="spark peak" style="height:100%"></div></div>
+          </div>
+        </div>
+
+        <!-- Bottom row: Activity + Quick Actions -->
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:14px">
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Recent Console Activity</div><div class="card-sub">AR-01 · All admin actions → FHIR AuditEvent · Immutable</div></div>
+              <button class="btn btn-ghost btn-sm" onclick="switchTabById('audittrail')">Full trail →</button>
+            </div>
+            <div class="card-body" style="padding:8px 16px">
+              <div class="activity-item">
+                <div class="activity-dot-wrap"><div class="activity-dot crit"></div><div class="activity-line"></div></div>
+                <div class="activity-content"><div class="activity-title">Certificate revoked — MoH-Cert-PKI-0038</div><div class="activity-sub">Point Pedro Base Hospital · <span style="color:var(--crit)">Cert expired 15 Jun 2026</span> · by Ravi A.</div></div>
+                <div class="activity-time">06:44</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot-wrap"><div class="activity-dot warn"></div><div class="activity-line"></div></div>
+                <div class="activity-content"><div class="activity-title">SIEM rule updated — Rule #110124 threshold raised</div><div class="activity-sub">Brute-force detection · 12→15 attempts · by Pathirage D.</div></div>
+                <div class="activity-time">05:21</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot-wrap"><div class="activity-dot ok"></div><div class="activity-line"></div></div>
+                <div class="activity-content"><div class="activity-title">Certificate issued — MoH-Cert-PKI-0241</div><div class="activity-sub">Colombo National Hospital · TLS Client · 1 year validity</div></div>
+                <div class="activity-time">04:18</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot-wrap"><div class="activity-dot info"></div><div class="activity-line"></div></div>
+                <div class="activity-content"><div class="activity-title">User account created — dr.perera@kandy.moh.lk</div><div class="activity-sub">Role: Compliance Officer · Grafana Org: Kandy Region</div></div>
+                <div class="activity-time">03:55</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot-wrap"><div class="activity-dot ok"></div></div>
+                <div class="activity-content"><div class="activity-title">OpenSearch ILM snapshot completed</div><div class="activity-sub">Index: audit-events-2026.07.11 · 2.4 GB · WORM lock applied</div></div>
+                <div class="activity-time">02:00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Quick Actions</div></div>
+              <div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px">
+                <button class="btn btn-warn" style="justify-content:flex-start;width:100%" onclick="switchTab('pki', document.querySelectorAll('.tab-item')[1])">⚠ View 3 Expiring Certs</button>
+                <button class="btn btn-secondary" style="justify-content:flex-start;width:100%" onclick="toast('Opening create user form…','ok')">👤 Create User Account</button>
+                <button class="btn btn-secondary" style="justify-content:flex-start;width:100%" onclick="switchTab('siem', document.querySelectorAll('.tab-item')[4])">🚨 Review SIEM Rules</button>
+                <button class="btn btn-secondary" style="justify-content:flex-start;width:100%" onclick="switchTab('opensearch', document.querySelectorAll('.tab-item')[5])">🗄 Check Index Status</button>
+                <button class="btn btn-secondary" style="justify-content:flex-start;width:100%" onclick="confirmAction('Force NTP resync across all 14 facilities?','This will briefly interrupt NTP synchronisation. Facilities will auto-reconnect within 30 seconds.','Force Resync','ok',()=>toast('NTP resync triggered across 14 facilities','ok'))">🕐 Force NTP Resync</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Contract Milestones</div></div>
+              <div style="padding:10px 14px;display:flex;flex-direction:column;gap:8px;font-size:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--sl-600)">D1 Inception Report</span><span class="badge badge-crit">Due 24 Jul</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--sl-600)">D20 Connectathon</span><span class="badge badge-warn">31 Oct 2026</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--sl-600)">D28 Management APIs</span><span class="badge badge-slate">M4 Sprint</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--sl-600)">D33 UAT</span><span class="badge badge-slate">M6 Sprint</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PKI CERTIFICATES ── -->
+      <div id="tab-pki" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search by CN, SAN, facility, serial…" /></div>
+          <select class="search-input" style="max-width:160px;padding-left:10px"><option>All types</option><option>TLS Client</option><option>TLS Server</option><option>Code Signing</option></select>
+          <select class="search-input" style="max-width:160px;padding-left:10px"><option>All status</option><option>Operational</option><option>Expiring ≤30d</option><option>Expired</option><option>Revoked</option></select>
+          <button class="btn btn-primary" style="margin-left:auto" onclick="openModal('issueModal')">+ Issue Certificate</button>
+        </div>
+
+        <div class="alert-banner warn"><span class="alert-icon">⚠</span><div><div class="alert-title">3 certificates expiring in ≤14 days</div>Renew before expiry to avoid service disruption. OCSP will show revoked status once expired.</div></div>
+
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Certificate Inventory</div><div class="card-sub">247 active · D28 Step-CA REST API · FR-01–FR-18 · Blueprint §6.1.2</div></div>
+            <div class="card-actions"><button class="btn btn-secondary btn-sm" onclick="toast('Downloading CRL…','ok')">⬇ CRL</button><button class="btn btn-secondary btn-sm" onclick="toast('Exporting CSV…','ok')">⬇ CSV</button></div>
+          </div>
+          <table class="dt" id="pki-table">
+            <thead><tr>
+              <th>Certificate ID</th><th>Common Name</th><th>Issued To</th><th>Type</th><th>Expiry</th><th>OCSP</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+              <tr class="clickable"><td><span class="mono">PKI-0241</span></td><td style="font-size:12px">api.colombo.moh.lk</td><td><div style="font-size:12.5px">Colombo National</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400)">LKA-HFR-0042</div></td><td><span class="badge badge-info">TLS Client</span></td><td style="font-size:12px;color:var(--sl-600)">24 Jun 2027</td><td><span class="badge badge-ok"><span class="dot"></span>Good</span></td><td><span class="badge badge-ok"><span class="dot"></span>Operational</span></td><td><button class="btn btn-ghost btn-xs">View</button></td></tr>
+              <tr class="clickable" style="background:#fffbeb"><td><span class="mono">PKI-0047</span></td><td style="font-size:12px">api.karapitiya.moh.lk</td><td><div style="font-size:12.5px">Karapitiya Teaching</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400)">LKA-HFR-0018</div></td><td><span class="badge badge-info">TLS Server</span></td><td style="font-size:12px;color:var(--warn);font-weight:700">26 Jul 2026</td><td><span class="badge badge-ok"><span class="dot"></span>Good</span></td><td><span class="badge badge-warn"><span class="dot"></span>Expiring</span></td><td><button class="btn btn-warn btn-xs" onclick="toast('Opening renewal workflow for PKI-0047…','warn')">Renew</button></td></tr>
+              <tr class="clickable" style="background:#fffbeb"><td><span class="mono">PKI-0052</span></td><td style="font-size:12px">ntp.jaffna.moh.lk</td><td><div style="font-size:12.5px">Jaffna Teaching</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400)">LKA-HFR-0007</div></td><td><span class="badge badge-info">TLS Client</span></td><td style="font-size:12px;color:var(--warn);font-weight:700">28 Jul 2026</td><td><span class="badge badge-ok"><span class="dot"></span>Good</span></td><td><span class="badge badge-warn"><span class="dot"></span>Expiring</span></td><td><button class="btn btn-warn btn-xs" onclick="toast('Opening renewal workflow for PKI-0052…','warn')">Renew</button></td></tr>
+              <tr class="clickable" style="background:#fff8f8"><td><span class="mono">PKI-0038</span></td><td style="font-size:12px">siem.ptpedro.moh.lk</td><td><div style="font-size:12.5px">Point Pedro Base</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400)">LKA-HFR-0031</div></td><td><span class="badge badge-slate">Code Sign</span></td><td style="font-size:12px;color:var(--crit);font-weight:700">15 Jun 2026</td><td><span class="badge badge-crit"><span class="dot"></span>Revoked</span></td><td><span class="badge badge-crit"><span class="dot"></span>Expired</span></td><td><button class="btn btn-danger btn-xs" onclick="event.stopPropagation();confirmAction('Revoke MoH-Cert-PKI-0038?','This is irreversible. The certificate will be added to the CRL immediately and OCSP status will show Revoked. Services using this cert will fail.','Revoke Certificate','crit',()=>toast('✓ PKI-0038 revoked — CRL updated','ok'))">Revoke</button></td></tr>
+              <tr class="clickable"><td><span class="mono">PKI-0199</span></td><td style="font-size:12px">api.jaffna.moh.lk</td><td><div style="font-size:12.5px">Jaffna Teaching</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400)">LKA-HFR-0007</div></td><td><span class="badge badge-info">TLS Client</span></td><td style="font-size:12px;color:var(--sl-600)">11 Mar 2027</td><td><span class="badge badge-ok"><span class="dot"></span>Good</span></td><td><span class="badge badge-ok"><span class="dot"></span>Operational</span></td><td><button class="btn btn-ghost btn-xs">View</button></td></tr>
+              <tr class="clickable"><td><span class="mono">PKI-0187</span></td><td style="font-size:12px">metrics.kandy.moh.lk</td><td><div style="font-size:12.5px">Kandy Teaching</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400)">LKA-HFR-0011</div></td><td><span class="badge badge-info">TLS Server</span></td><td style="font-size:12px;color:var(--sl-600)">02 Feb 2027</td><td><span class="badge badge-ok"><span class="dot"></span>Good</span></td><td><span class="badge badge-ok"><span class="dot"></span>Operational</span></td><td><button class="btn btn-ghost btn-xs">View</button></td></tr>
+            </tbody>
+          </table>
+          <div id="pki-table-empty" class="empty-state">
+            <div class="empty-state-icon">🔐</div>
+            <div class="empty-state-title">No certificates match your search</div>
+            <div class="empty-state-sub">Try adjusting your filters or search term</div>
+          </div>
+      <div id="tab-users" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search users by name, email, role…" /></div>
+          <select class="search-input" style="max-width:160px;padding-left:10px"><option>All systems</option><option>Grafana</option><option>Wazuh</option><option>Both</option></select>
+          <button class="btn btn-primary" style="margin-left:auto" onclick="toast('Opening create user form…','ok')">+ Create User</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Operator Accounts</div><div class="card-sub">D29 M5 · Grafana + Wazuh RBAC · Blueprint §6.2</div></div>
+            <div class="card-actions"><button class="btn btn-secondary btn-sm" onclick="toast('Exporting user list…','ok')">⬇ Export</button></div>
+          </div>
+          <table class="dt" id="users-table">
+            <thead><tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Systems</th><th>Last Login</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr class="clickable"><td><div class="avatar-sm admin">SA</div></td><td style="font-weight:600">Sandun Abeywickrama</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-500)">sandun.a@inova.lk</td><td><span class="badge badge-purple">Platform Admin</span></td><td><span class="badge badge-slate">Grafana + Wazuh</span></td><td style="font-size:11.5px;color:var(--sl-400)">Today 07:12</td><td><span class="badge badge-ok"><span class="dot"></span>Active</span></td><td><button class="btn btn-ghost btn-xs">Edit</button></td></tr>
+              <tr class="clickable"><td><div class="avatar-sm">HW</div></td><td style="font-weight:600">Hirandi Wickramasinghe</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-500)">hirandi.w@inova.lk</td><td><span class="badge badge-info">Privacy Officer</span></td><td><span class="badge badge-slate">Audit Portal</span></td><td style="font-size:11.5px;color:var(--sl-400)">Today 06:10</td><td><span class="badge badge-ok"><span class="dot"></span>Active</span></td><td><button class="btn btn-ghost btn-xs">Edit</button></td></tr>
+              <tr class="clickable"><td><div class="avatar-sm">PD</div></td><td style="font-weight:600">Pathirage Dissanayake</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-500)">pathirage.d@moh.gov.lk</td><td><span class="badge badge-crit">Security Engineer</span></td><td><span class="badge badge-slate">Wazuh + Grafana</span></td><td style="font-size:11.5px;color:var(--sl-400)">Today 05:21</td><td><span class="badge badge-ok"><span class="dot"></span>Active</span></td><td><button class="btn btn-ghost btn-xs">Edit</button></td></tr>
+              <tr class="clickable"><td><div class="avatar-sm readonly">KP</div></td><td style="font-weight:600">Dr. K. Perera</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-500)">dr.perera@kandy.moh.lk</td><td><span class="badge badge-slate">Compliance Officer</span></td><td><span class="badge badge-slate">Grafana (read)</span></td><td style="font-size:11.5px;color:var(--sl-400)">Yesterday</td><td><span class="badge badge-ok"><span class="dot"></span>Active</span></td><td><button class="btn btn-ghost btn-xs">Edit</button></td></tr>
+              <tr class="clickable" style="opacity:.6"><td><div class="avatar-sm readonly">RM</div></td><td style="font-weight:600">Roshan Mendis</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-500)">roshan.m@moh.gov.lk</td><td><span class="badge badge-slate">NOC Operator</span></td><td><span class="badge badge-slate">Grafana (NOC org)</span></td><td style="font-size:11.5px;color:var(--sl-400)">3 days ago</td><td><span class="badge badge-slate">Inactive</span></td><td><button class="btn btn-secondary btn-xs" onclick="toast('Activating account for roshan.m…','ok')">Activate</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+          <div id="users-table-empty" class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <div class="empty-state-title">No users match your search</div>
+            <div class="empty-state-sub">Try a different name, email, or role</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ALERT CONFIG ── -->
+      <div id="tab-alerts" style="display:none">
+        <div class="alert-banner ok"><span class="alert-icon">✓</span><div><div class="alert-title">Alertmanager connected — 4 active routing rules</div>Last test delivery: Today 06:00 · All channels responding · APM-27 Component Criticality Tier Model applied.</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card">
+            <div class="card-header"><div><div class="card-title">Routing Rules</div><div class="card-sub">Grafana Alertmanager · D28 REST API · APM-27</div></div><button class="btn btn-primary btn-sm" onclick="toast('Opening new routing rule form…','ok')">+ Add Rule</button></div>
+            <div style="padding:0">
+              <div class="rule-row">
+                <div class="severity-dot crit"></div>
+                <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">Critical — Immediate</div><div style="font-size:11.5px;color:var(--sl-400)">SIEM-35 · Cert expiry · Chain breach</div></div>
+                <div style="font-size:11.5px;color:var(--sl-600)">SMS + Email</div>
+                <div class="toggle"><input type="checkbox" checked id="t1"><label class="toggle-track" for="t1"></label><div class="toggle-thumb"></div></div>
+              </div>
+              <div class="rule-row">
+                <div class="severity-dot warn"></div>
+                <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">Warning — Within 1h</div><div style="font-size:11.5px;color:var(--sl-400)">Cert expiry ≤30d · NTP drift >50ms</div></div>
+                <div style="font-size:11.5px;color:var(--sl-600)">Email only</div>
+                <div class="toggle"><input type="checkbox" checked id="t2"><label class="toggle-track" for="t2"></label><div class="toggle-thumb"></div></div>
+              </div>
+              <div class="rule-row">
+                <div class="severity-dot info"></div>
+                <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">Info — Daily digest</div><div style="font-size:11.5px;color:var(--sl-400)">Successful cert issuance · NTP sync</div></div>
+                <div style="font-size:11.5px;color:var(--sl-600)">Email only</div>
+                <div class="toggle"><input type="checkbox" id="t3"><label class="toggle-track" for="t3"></label><div class="toggle-thumb"></div></div>
+              </div>
+              <div class="rule-row">
+                <div class="severity-dot ok"></div>
+                <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600">Resolved — Auto-clear</div><div style="font-size:11.5px;color:var(--sl-400)">When previous alert condition resolves</div></div>
+                <div style="font-size:11.5px;color:var(--sl-600)">Email only</div>
+                <div class="toggle"><input type="checkbox" checked id="t4"><label class="toggle-track" for="t4"></label><div class="toggle-thumb"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div><div class="card-title">Notification Channels</div><div class="card-sub">Recipients per severity tier</div></div><button class="btn btn-secondary btn-sm" onclick="toast('Testing all channels…','ok')">⚡ Test All</button></div>
+            <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+              <div style="background:var(--sl-50);border:1px solid var(--sl-200);border-radius:var(--r-sm);padding:12px">
+                <div style="font-size:11px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">SMS Recipients (Critical only)</div>
+                <div style="font-size:12.5px;color:var(--sl-700)">+94 77 xxx xxxx — Sandun A. (Platform Lead)</div>
+                <div style="font-size:12.5px;color:var(--sl-700)">+94 71 xxx xxxx — MoH NOC Duty Officer</div>
+              </div>
+              <div style="background:var(--sl-50);border:1px solid var(--sl-200);border-radius:var(--r-sm);padding:12px">
+                <div style="font-size:11px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Email Group</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-600)">b3-alerts@inova.lk</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sl-600)">noc@moh.gov.lk</div>
+              </div>
+              <button class="btn btn-secondary" style="width:100%" onclick="toast('Saving channel config…','ok')">💾 Save Channel Config</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SIEM RULES ── -->
+      <div id="tab-siem" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search rules by ID, name, decoder…" /></div>
+          <select class="search-input" style="max-width:160px;padding-left:10px"><option>All groups</option><option>Authentication</option><option>Network</option><option>HL7/FHIR</option><option>Custom</option></select>
+          <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="toast('Opening decoder upload…','ok')">⬆ Upload Decoder</button>
+          <button class="btn btn-primary btn-sm" onclick="toast('Opening custom rule editor…','ok')">+ Custom Rule</button>
+        </div>
+        <div class="alert-banner crit"><span class="alert-icon">✕</span><div><div class="alert-title">14 active alerts firing — review required</div>SIEM-35 brute-force rule #110124 is firing on Karapitiya facility. Wazuh rule threshold may need adjustment.</div><button class="btn btn-danger btn-sm" style="margin-left:auto;flex-shrink:0" onclick="toast('Opening AE-00913 in Audit Review…','crit')">View Event →</button></div>
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Active Wazuh Rules</div><div class="card-sub">D28 Wazuh REST API · SIEM-03 rule-based detection · SIEM-06 custom decoders</div></div></div>
+          <table class="dt">
+            <thead><tr><th>Rule ID</th><th>Name</th><th>Group</th><th>Level</th><th>Fires (24h)</th><th>Custom</th><th>Enabled</th></tr></thead>
+            <tbody>
+              <tr class="clickable" style="background:#fff8f8"><td><span class="mono">110124</span></td><td style="font-weight:600;color:var(--crit)">Brute-force authentication</td><td><span class="badge badge-slate">auth</span></td><td><span class="badge badge-crit">12</span></td><td style="font-weight:700;color:var(--crit)">14</td><td><span class="badge badge-ok">Custom</span></td><td><div class="toggle"><input type="checkbox" checked id="r1"><label class="toggle-track" for="r1"></label><div class="toggle-thumb"></div></div></td></tr>
+              <tr class="clickable"><td><span class="mono">100002</span></td><td>FHIR AuditEvent POST failure</td><td><span class="badge badge-slate">hl7</span></td><td><span class="badge badge-warn">8</span></td><td>2</td><td><span class="badge badge-ok">Custom</span></td><td><div class="toggle"><input type="checkbox" checked id="r2"><label class="toggle-track" for="r2"></label><div class="toggle-thumb"></div></div></td></tr>
+              <tr class="clickable"><td><span class="mono">100003</span></td><td>NHDX anomalous record volume</td><td><span class="badge badge-slate">network</span></td><td><span class="badge badge-warn">9</span></td><td>0</td><td><span class="badge badge-ok">Custom</span></td><td><div class="toggle"><input type="checkbox" checked id="r3"><label class="toggle-track" for="r3"></label><div class="toggle-thumb"></div></div></td></tr>
+              <tr class="clickable"><td><span class="mono">5501</span></td><td>SSH login failed</td><td><span class="badge badge-slate">syslog</span></td><td><span class="badge badge-info">5</span></td><td>3</td><td></td><td><div class="toggle"><input type="checkbox" checked id="r4"><label class="toggle-track" for="r4"></label><div class="toggle-thumb"></div></div></td></tr>
+              <tr class="clickable"><td><span class="mono">31103</span></td><td>Web access — PHP attack attempt</td><td><span class="badge badge-slate">web</span></td><td><span class="badge badge-warn">7</span></td><td>0</td><td></td><td><div class="toggle"><input type="checkbox" id="r5"><label class="toggle-track" for="r5"></label><div class="toggle-thumb"></div></div></td></tr>
+              <tr class="clickable"><td><span class="mono">100010</span></td><td>NTP offset exceeded ±50ms</td><td><span class="badge badge-slate">ntp</span></td><td><span class="badge badge-info">4</span></td><td>0</td><td><span class="badge badge-ok">Custom</span></td><td><div class="toggle"><input type="checkbox" checked id="r6"><label class="toggle-track" for="r6"></label><div class="toggle-thumb"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── OPENSEARCH INDEXES ── -->
+      <div id="tab-opensearch" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search indexes…" /></div>
+          <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="toast('Triggering manual snapshot…','ok')">📸 Manual Snapshot</button>
+          <button class="btn btn-primary btn-sm" onclick="toast('Checking cross-cluster replication lag…','ok')">⟳ Check DR Lag</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Index Status</div><div class="card-sub">D28 OpenSearch REST API · AR-22 WORM ILM · NFR-05 RPO &lt;15min DR</div></div></div>
+          <table class="dt">
+            <thead><tr><th>Index Name</th><th>Docs</th><th>Size</th><th>Usage</th><th>ILM Phase</th><th>WORM</th><th>DR Lag</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr class="clickable"><td><span class="mono" style="font-size:10.5px">audit-events-2026.07.12</span></td><td>1,842</td><td>428 MB</td><td><div>36%</div><div class="index-bar"><div class="index-fill" style="width:36%"></div></div></td><td><span class="badge badge-ok">hot</span></td><td><span class="badge badge-ok">✓ Locked</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)">+4s</td><td><span class="badge badge-ok"><span class="dot"></span>OK</span></td></tr>
+              <tr class="clickable"><td><span class="mono" style="font-size:10.5px">audit-events-2026.07.11</span></td><td>6,204</td><td>2.4 GB</td><td><div>100%</div><div class="index-bar"><div class="index-fill" style="width:100%"></div></div></td><td><span class="badge badge-info">warm</span></td><td><span class="badge badge-ok">✓ Locked</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)">+6s</td><td><span class="badge badge-ok"><span class="dot"></span>OK</span></td></tr>
+              <tr class="clickable"><td><span class="mono" style="font-size:10.5px">wazuh-alerts-2026.07.12</span></td><td>14</td><td>12 MB</td><td><div>1%</div><div class="index-bar"><div class="index-fill" style="width:1%"></div></div></td><td><span class="badge badge-ok">hot</span></td><td><span class="badge badge-slate">Pending</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)">+3s</td><td><span class="badge badge-ok"><span class="dot"></span>OK</span></td></tr>
+              <tr class="clickable"><td><span class="mono" style="font-size:10.5px">metrics-apm-2026.07.12</span></td><td>48,201</td><td>1.1 GB</td><td><div>72%</div><div class="index-bar"><div class="index-fill warn" style="width:72%"></div></div></td><td><span class="badge badge-ok">hot</span></td><td><span class="badge badge-slate">N/A</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)">+4s</td><td><span class="badge badge-warn"><span class="dot"></span>Full soon</span></td></tr>
+              <tr class="clickable"><td><span class="mono" style="font-size:10.5px">ntp-drift-2026.07</span></td><td>40,320</td><td>310 MB</td><td><div>42%</div><div class="index-bar"><div class="index-fill" style="width:42%"></div></div></td><td><span class="badge badge-ok">hot</span></td><td><span class="badge badge-slate">N/A</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ok)">+5s</td><td><span class="badge badge-ok"><span class="dot"></span>OK</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── CONSOLE AUDIT TRAIL ── -->
+      <div id="tab-audittrail" style="display:none">
+        <div class="alert-banner ok"><span class="alert-icon">🔗</span><div><div class="alert-title">Every action on this console is itself a FHIR AuditEvent (AR-01 · AR-41)</div>SHA-256 chain intact · Console audits itself · Read-only view · Cannot be modified.</div></div>
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">Console Action Log</div><div class="card-sub">AR-01 · All management actions → FHIR AuditEvent → Audit Repository · SHA-256 chained</div></div><button class="btn btn-secondary btn-sm" onclick="toast('Exporting audit trail CSV…','ok')">⬇ Export</button></div>
+          <table class="dt">
+            <thead><tr><th>Event ID</th><th>Timestamp (UTC)</th><th>Action</th><th>Resource</th><th>By</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td><span class="mono">CAE-0141</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">07:02:14</td><td>Certificate Revoked</td><td><span class="mono">PKI-0038</span></td><td>Ravi A.</td><td><span class="badge badge-ok">Success</span></td></tr>
+              <tr><td><span class="mono">CAE-0140</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">05:21:08</td><td>SIEM Rule Updated</td><td><span class="mono">Rule #110124</span></td><td>Pathirage D.</td><td><span class="badge badge-ok">Success</span></td></tr>
+              <tr><td><span class="mono">CAE-0139</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">04:18:33</td><td>Certificate Issued</td><td><span class="mono">PKI-0241</span></td><td>Ravi A.</td><td><span class="badge badge-ok">Success</span></td></tr>
+              <tr><td><span class="mono">CAE-0138</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">03:55:01</td><td>User Created</td><td><span class="mono">usr-1204</span></td><td>Roshan J.</td><td><span class="badge badge-ok">Success</span></td></tr>
+              <tr><td><span class="mono">CAE-0137</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">02:00:00</td><td>Snapshot Triggered</td><td><span class="mono">audit-events-2026.07.11</span></td><td>System (ILM)</td><td><span class="badge badge-ok">Success</span></td></tr>
+              <tr><td><span class="mono">CAE-0136</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">Yesterday 23:41</td><td>Alert Rule Disabled</td><td><span class="mono">Rule #31103</span></td><td>Sandun A.</td><td><span class="badge badge-warn">Warn: not reversed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </main>
+</div>
+
+<!-- ═══════ ISSUE CERTIFICATE MODAL ═══════ -->
+<div class="modal-overlay" id="issueModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔐 Issue New Certificate</div>
+      <button class="modal-close" onclick="closeModal('issueModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Facility <span class="form-req">*</span></label>
+          <select class="form-input"><option>Select facility…</option><option>Colombo National Hospital</option><option>Karapitiya Teaching</option><option>Jaffna Teaching</option><option>Point Pedro Base</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certificate Type <span class="form-req">*</span></label>
+          <select class="form-input"><option>TLS Client</option><option>TLS Server</option><option>Code Signing</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Common Name (CN) <span class="form-req">*</span></label>
+        <input class="form-input" type="text" placeholder="e.g. api.colombo.moh.lk" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject Alternative Names (SANs)</label>
+        <input class="form-input" type="text" placeholder="e.g. api.colombo.moh.lk, metrics.colombo.moh.lk" />
+        <div class="form-hint">Comma-separated. No spaces before commas.</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Validity Period</label>
+          <select class="form-input"><option>1 year</option><option>2 years</option><option>90 days (short-lived)</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Provisioner</label>
+          <select class="form-input"><option>ACME (auto)</option><option>JWK (manual)</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Purpose / Notes</label>
+        <input class="form-input" type="text" placeholder="e.g. Replacing PKI-0047 (expiring 26 Jul 2026)" />
+        <div class="form-hint">Stored in Audit Repository per AR-43</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('issueModal')">Cancel</button>
+      <button class="btn btn-primary" id="issueSubmitBtn" onclick="submitIssueModal()">Issue Certificate →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM GUARD -->
+<div class="confirm-guard" id="confirmGuard">
+  <div class="confirm-box">
+    <div class="confirm-box-header">
+      <span id="confirmIcon" style="font-size:16px">⚠</span>
+      <div class="confirm-box-title" id="confirmTitle">Confirm action</div>
+    </div>
+    <div class="confirm-box-body" id="confirmBody"></div>
+    <div class="confirm-box-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('confirmGuard').classList.remove('open')">Cancel</button>
+      <button class="btn" id="confirmOkBtn" onclick="confirmOk()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"><span class="toast-dot" id="toastDot"></span><span id="toastMsg"></span></div>
+
+<script>
+const tabIds = ['overview','pki','users','alerts','siem','opensearch','audittrail'];
+const tabCTAs = {
+  overview:    null, // no context CTA change on overview
+  pki:         { label: '+ Issue Certificate', action: "openModal('issueModal')" },
+  users:       { label: '+ Create User', action: "toast('Opening create user form…','ok')" },
+  alerts:      { label: '⚡ Test Alerts', action: "toast('Testing all alert channels…','ok')" },
+  siem:        { label: '+ Custom Rule', action: "toast('Opening custom rule editor…','ok')" },
+  opensearch:  { label: '📸 Manual Snapshot', action: "toast('Triggering manual snapshot…','ok')" },
+  audittrail:  { label: '⬇ Export Trail', action: "toast('Exporting audit trail CSV…','ok')" },
+};
+
+/* ── Tab switching ── */
+function switchTab(id, el) {
+  tabIds.forEach(t => {
+    const panel = document.getElementById('tab-' + t);
+    if (panel) panel.style.display = t === id ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  // Scroll content area to top on tab change
+  window.scrollTo({ top: document.querySelector('.page-hero').offsetHeight + 56, behavior: 'smooth' });
+
+  // Update hero context CTA
+  const cta = tabCTAs[id];
+  const ctaBtn = document.getElementById('heroCta');
+  if (ctaBtn && cta) {
+    ctaBtn.textContent = cta.label;
+    ctaBtn.setAttribute('onclick', cta.action);
+    ctaBtn.style.display = '';
+  } else if (ctaBtn) {
+    ctaBtn.style.display = 'none';
+  }
+}
+
+/* ── Tab keyboard navigation (←→ arrow keys) — WCAG 2.1 ── */
+document.querySelectorAll('.tab-item').forEach((tab, i, tabs) => {
+  tab.setAttribute('tabindex', i === 0 ? '0' : '-1');
+  tab.setAttribute('role', 'tab');
+  tab.addEventListener('keydown', e => {
+    let next = i;
+    if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+    else return;
+    e.preventDefault();
+    tabs[next].focus();
+    tabs[next].click();
+    tabs.forEach((t,j) => t.setAttribute('tabindex', j === next ? '0' : '-1'));
+  });
+});
+
+/* ── Confirm guard ── */
+let _confirmCallback = null;
+
+function confirmAction(title, body, okLabel, type, callback) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmBody').textContent = body;
+  document.getElementById('confirmIcon').textContent = type === 'crit' ? '⚠' : '⚡';
+  const btn = document.getElementById('confirmOkBtn');
+  btn.textContent = okLabel;
+  btn.className = 'btn ' + (type === 'crit' ? 'btn-danger' : type === 'ok' ? 'btn-primary' : 'btn-warn');
+  _confirmCallback = callback;
+  document.getElementById('confirmGuard').classList.add('open');
+}
+
+function confirmOk() {
+  document.getElementById('confirmGuard').classList.remove('open');
+  if (_confirmCallback) { _confirmCallback(); _confirmCallback = null; }
+}
+
+document.getElementById('confirmGuard').addEventListener('click', e => {
+  if (e.target === document.getElementById('confirmGuard'))
+    document.getElementById('confirmGuard').classList.remove('open');
+});
+
+/* ── Modal ── */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+/* ── Modal validation for Issue Certificate ── */
+function submitIssueModal() {
+  const facilityEl = document.querySelector('#issueModal select');
+  const cnEl = document.querySelector('#issueModal input[type="text"]');
+  let valid = true;
+
+  [facilityEl, cnEl].forEach(el => {
+    el.classList.remove('invalid');
+    const err = el.nextElementSibling;
+    if (err && err.classList.contains('form-error-msg')) err.classList.remove('visible');
+  });
+
+  if (!facilityEl.value || facilityEl.value.startsWith('Select')) {
+    facilityEl.classList.add('invalid');
+    valid = false;
+  }
+  if (!cnEl.value.trim()) {
+    cnEl.classList.add('invalid');
+    let errEl = cnEl.nextElementSibling;
+    if (!errEl || !errEl.classList.contains('form-error-msg')) {
+      errEl = document.createElement('div');
+      errEl.className = 'form-error-msg';
+      errEl.textContent = 'Common name is required';
+      cnEl.after(errEl);
+    }
+    errEl.classList.add('visible');
+    valid = false;
+  }
+
+  if (!valid) {
+    toast('Please fill required fields', 'crit');
+    return;
+  }
+
+  closeModal('issueModal');
+  toast('✓ Certificate issued — PKI-0242 active', 'ok');
+}
+
+/* ── Keyboard shortcuts ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    document.getElementById('confirmGuard').classList.remove('open');
+  }
+});
+
+/* ── Toast ── */
+function toast(msg, type) {
+  const el = document.getElementById('toastEl');
+  const dot = document.getElementById('toastDot');
+  document.getElementById('toastMsg').textContent = msg;
+  dot.className = 'toast-dot' + (type === 'crit' ? ' crit' : type === 'warn' ? ' warn' : '');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ── Toggle names in feedback ── */
+document.querySelectorAll('.toggle input').forEach(inp => {
+  inp.addEventListener('change', function() {
+    // Find closest rule name
+    const row = this.closest('.rule-row') || this.closest('tr');
+    let name = '';
+    if (row) {
+      const titleEl = row.querySelector('[style*="font-weight:600"]') || row.cells?.[1];
+      name = titleEl ? ' — ' + (titleEl.textContent || titleEl.innerText).trim().substring(0, 40) : '';
+    }
+    toast((this.checked ? 'Enabled' : 'Disabled') + name, this.checked ? 'ok' : 'warn');
+  });
+});
+
+/* ── Search filtering (PKI + Users tabs) ── */
+function filterTable(inputEl, tableId) {
+  const q = inputEl.value.toLowerCase();
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  let visible = 0;
+  rows.forEach(r => {
+    const match = r.textContent.toLowerCase().includes(q);
+    r.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  const emptyEl = document.getElementById(tableId + '-empty');
+  if (emptyEl) emptyEl.classList.toggle('visible', visible === 0);
+}
+
+// Attach search filtering to PKI and Users search inputs
+document.addEventListener('DOMContentLoaded', () => {
+  const pkiSearch = document.querySelector('#tab-pki .search-input');
+  if (pkiSearch) pkiSearch.addEventListener('input', () => filterTable(pkiSearch, 'pki-table'));
+  const usersSearch = document.querySelector('#tab-users .search-input');
+  if (usersSearch) usersSearch.addEventListener('input', () => filterTable(usersSearch, 'users-table'));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding Portal — B3 Platform Support Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   B3 DESIGN TOKENS — identical to S1 + S2
+═══════════════════════════════════════════ */
+:root {
+  --teal-50:#F0FDFA; --teal-100:#CCFBF1; --teal-200:#99F6E4;
+  --teal-300:#5EEAD4; --teal-400:#2DD4BF; --teal-500:#14B8A6;
+  --teal-600:#0D9488; --teal-700:#0F766E; --teal-800:#115E59; --teal-900:#134E4A;
+  --sl-50:#F8FAFC; --sl-100:#F1F5F9; --sl-200:#E2E8F0; --sl-300:#CBD5E1;
+  --sl-400:#94A3B8; --sl-500:#64748B; --sl-600:#475569; --sl-700:#334155;
+  --sl-800:#1E293B; --sl-900:#0F172A;
+  --ok:#0D9488;   --ok-bg:#CCFBF1;   --ok-bdr:#99F6E4;
+  --warn:#D97706; --warn-bg:#FEF3C7; --warn-bdr:#FCD34D;
+  --crit:#DC2626; --crit-bg:#FEE2E2; --crit-bdr:#FCA5A5;
+  --info:#0284C7; --info-bg:#E0F2FE; --info-bdr:#7DD3FC;
+  --purple:#7C3AED; --purple-bg:#EDE9FE;
+  --topbar-h:56px; --sidebar-w:220px; --step-rail:280px;
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+  --shadow-sm:0 1px 3px rgba(15,118,110,.08),0 1px 2px rgba(15,118,110,.06);
+  --shadow-md:0 4px 16px rgba(15,118,110,.10);
+  --shadow-lg:0 12px 40px rgba(15,118,110,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--teal-50);color:var(--sl-800);font-size:13.5px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--sl-300);border-radius:10px}
+:focus-visible{outline:2px solid var(--teal-500);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ══ TOPBAR ══ */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);background:var(--teal-900);display:flex;align-items:center;padding:0 0 0 16px;z-index:200;box-shadow:0 2px 0 rgba(0,0,0,.18),0 4px 16px rgba(0,0,0,.14)}
+.tb-logo{display:flex;align-items:center;gap:9px;color:#fff;font-size:14.5px;font-weight:700;letter-spacing:-.01em;flex-shrink:0;text-decoration:none;padding-right:16px;border-right:1px solid rgba(255,255,255,.15)}
+.tb-logo-icon{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.tb-bundle{margin-left:14px;background:var(--teal-600);color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.tb-breadcrumb{margin-left:14px;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.65);font-size:12.5px}
+.tb-breadcrumb .sep{opacity:.4}
+.tb-breadcrumb .current{color:#fff;font-weight:600}
+.tb-services{display:flex;gap:5px;margin-left:auto;padding:0 14px}
+.svc-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.10);color:rgba(255,255,255,.85);font-size:11px;font-weight:500;padding:3px 9px 3px 7px;border-radius:20px;border:1px solid rgba(255,255,255,.15);cursor:pointer;transition:background .15s;white-space:nowrap}
+.svc-pill:hover{background:rgba(255,255,255,.18)}
+.svc-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
+.svc-dot.warn{background:#fbbf24}
+@keyframes pulse-ok{0%,100%{opacity:1}50%{opacity:.5}}
+.svc-dot.ok{animation:pulse-ok 2.5s infinite}
+.tb-right{display:flex;align-items:center;gap:8px;padding:0 14px;border-left:1px solid rgba(255,255,255,.12)}
+.tb-icon-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.10);border:none;color:rgba(255,255,255,.85);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;position:relative;flex-shrink:0}
+.tb-icon-btn:hover{background:rgba(255,255,255,.20)}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--teal-500);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.25);flex-shrink:0}
+
+/* ══ SHELL ══ */
+.shell{display:flex;padding-top:var(--topbar-h);min-height:100vh}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:#fff;border-right:1px solid var(--sl-200);position:fixed;top:var(--topbar-h);bottom:0;left:0;overflow-y:auto;padding:16px 0 24px;z-index:100}
+.sb-group-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sl-400);padding:14px 16px 5px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 16px;color:var(--sl-600);font-size:13px;font-weight:500;cursor:pointer;border-left:3px solid transparent;transition:all .12s;text-decoration:none}
+.sb-item:hover{background:var(--teal-50);color:var(--teal-700)}
+.sb-item.active{background:var(--teal-50);color:var(--teal-700);border-left-color:var(--teal-600);font-weight:600}
+.sb-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.sb-badge.crit{background:var(--crit-bg);color:var(--crit)}
+.sb-badge.warn{background:var(--warn-bg);color:var(--warn)}
+.sb-badge.ok{background:var(--ok-bg);color:var(--ok)}
+.sb-divider{height:1px;background:var(--sl-100);margin:8px 16px}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* ══ HERO — same light treatment as S1 + S2 ══ */
+.page-hero{background:linear-gradient(180deg,#ffffff 0%,#f4fdfb 55%,var(--teal-50) 100%);border-bottom:1px solid var(--teal-100);padding:20px 28px 18px;position:relative}
+.page-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal-700) 0%,var(--teal-400) 55%,transparent 100%);pointer-events:none}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0;padding-top:6px}
+.hero-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-600);margin-bottom:4px}
+.hero-title{font-size:21px;font-weight:800;color:var(--teal-900);letter-spacing:-.02em;margin-bottom:3px}
+.hero-desc{font-size:12.5px;color:var(--sl-500);max-width:520px}
+
+/* ══ READINESS SCORE — the signature element ══ */
+.readiness-wrap{display:flex;align-items:center;gap:20px;flex-shrink:0}
+.readiness-score{text-align:center}
+.score-ring{position:relative;width:76px;height:76px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-track{fill:none;stroke:var(--sl-200);stroke-width:5}
+.score-fill{fill:none;stroke:var(--teal-500);stroke-width:5;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
+.score-fill.warn{stroke:var(--warn)}
+.score-fill.done{stroke:var(--ok)}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-pct{font-size:19px;font-weight:800;color:var(--teal-900);line-height:1}
+.score-label{font-size:8.5px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em}
+.readiness-steps{display:flex;flex-direction:column;gap:4px}
+.rs-step{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--sl-500)}
+.rs-icon{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
+.rs-icon.done{background:var(--ok-bg);color:var(--ok)}
+.rs-icon.active{background:var(--info-bg);color:var(--info);animation:pulse-active 1.5s infinite}
+.rs-icon.pending{background:var(--sl-100);color:var(--sl-400)}
+.rs-icon.fail{background:var(--crit-bg);color:var(--crit)}
+@keyframes pulse-active{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* ══ CONTENT AREA ══ */
+.content-area{display:flex;flex:1;min-height:0}
+
+/* ══ STEP RAIL ══ */
+.step-rail{width:var(--step-rail);flex-shrink:0;background:#fff;border-right:1px solid var(--sl-200);padding:20px 0;position:sticky;top:calc(var(--topbar-h) + 120px);height:calc(100vh - var(--topbar-h) - 120px);overflow-y:auto}
+.rail-section-label{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sl-400);padding:0 18px 8px}
+.rail-step{display:flex;align-items:flex-start;gap:12px;padding:10px 18px;cursor:pointer;transition:background .12s;position:relative}
+.rail-step:hover{background:var(--teal-50)}
+.rail-step.active{background:var(--teal-50)}
+.rail-step-left{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0}
+.rail-node{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;border:2px solid var(--sl-200);background:#fff;color:var(--sl-400);transition:all .2s}
+.rail-step.done .rail-node{background:var(--ok-bg);border-color:var(--ok-bdr);color:var(--ok)}
+.rail-step.active .rail-node{background:var(--teal-600);border-color:var(--teal-600);color:#fff;box-shadow:0 0 0 3px var(--teal-100)}
+.rail-step.fail .rail-node{background:var(--crit-bg);border-color:var(--crit-bdr);color:var(--crit)}
+.rail-connector{width:2px;height:28px;background:var(--sl-200);margin:2px 0;flex-shrink:0}
+.rail-step.done .rail-connector{background:var(--ok-bdr)}
+.rail-step:last-child .rail-connector{display:none}
+.rail-step-content{flex:1;min-width:0;padding-top:4px}
+.rail-step-num{font-size:9.5px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.08em}
+.rail-step-title{font-size:12.5px;font-weight:600;color:var(--sl-700);margin-top:1px}
+.rail-step.active .rail-step-title{color:var(--teal-700)}
+.rail-step.done .rail-step-title{color:var(--ok)}
+.rail-step-sub{font-size:11px;color:var(--sl-400);margin-top:1px}
+.rail-step-badge{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:8px;margin-top:3px}
+.rail-step-badge.done{background:var(--ok-bg);color:var(--ok)}
+.rail-step-badge.active{background:var(--info-bg);color:var(--info)}
+.rail-step-badge.pending{background:var(--sl-100);color:var(--sl-400)}
+.rail-step-badge.fail{background:var(--crit-bg);color:var(--crit)}
+
+/* ══ STEP CONTENT ══ */
+.step-content{flex:1;padding:24px;min-width:0;max-width:860px}
+.step-panel{display:none}
+.step-panel.active{display:block}
+
+/* Step header */
+.step-header{margin-bottom:20px}
+.step-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-600);margin-bottom:4px}
+.step-title{font-size:24px;font-weight:800;color:var(--teal-900);letter-spacing:-.02em;margin-bottom:5px}
+.step-desc{font-size:13px;color:var(--sl-500);line-height:1.6;max-width:600px}
+
+/* ══ CODE BLOCK ══ */
+.code-block{background:var(--sl-900);border-radius:var(--r-md);overflow:hidden;margin:12px 0}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--sl-800);border-bottom:1px solid rgba(255,255,255,.06)}
+.code-lang{font-size:10.5px;font-weight:600;color:var(--sl-400);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace}
+.code-copy{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--sl-400);background:none;border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:3px 9px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.code-copy:hover{background:rgba(255,255,255,.08);color:var(--teal-300);border-color:var(--teal-700)}
+.code-copy.copied{color:#4ade80;border-color:rgba(74,222,128,.3)}
+.code-body{padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;color:#e2e8f0;white-space:pre;overflow-x:auto}
+.code-body .c-comment{color:#64748b}
+.code-body .c-key{color:#93c5fd}
+.code-body .c-val{color:#86efac}
+.code-body .c-str{color:#fcd34d}
+.code-body .c-hi{color:#5eead4;font-weight:600}
+
+/* ══ VERIFICATION PANEL ══ */
+.verify-panel{border-radius:var(--r-md);border:1px solid var(--sl-200);overflow:hidden;margin-top:16px}
+.verify-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--sl-50);border-bottom:1px solid var(--sl-200)}
+.verify-title{font-size:12.5px;font-weight:700;color:var(--sl-700);display:flex;align-items:center;gap:7px}
+.verify-body{padding:14px 16px}
+.verify-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--sl-100);font-size:12.5px}
+.verify-row:last-child{border-bottom:none}
+.verify-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.verify-label{flex:1;color:var(--sl-600)}
+.verify-status{font-size:11px;font-weight:700;white-space:nowrap}
+.verify-status.ok{color:var(--ok)}
+.verify-status.checking{color:var(--info);animation:pulse-ok 1s infinite}
+.verify-status.pending{color:var(--sl-400)}
+.verify-status.fail{color:var(--crit)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--info);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:3px}
+
+/* ══ FORM ELEMENTS ══ */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--sl-700);margin-bottom:4px}
+.form-req{color:var(--crit);margin-left:2px}
+.form-hint{font-size:11px;color:var(--sl-400);margin-top:3px}
+.form-input{width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--sl-800);background:#fff;border:1px solid var(--sl-300);border-radius:var(--r-sm);padding:8px 11px;outline:none;transition:border-color .15s,box-shadow .15s}
+.form-input:focus{border-color:var(--teal-400);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.form-input::placeholder{color:var(--sl-400)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+select.form-input{cursor:pointer}
+
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:var(--r-sm);border:1px solid transparent;cursor:pointer;transition:all .14s;white-space:nowrap;line-height:1}
+.btn-primary{background:var(--teal-600);color:#fff;border-color:var(--teal-600)}
+.btn-primary:hover{background:var(--teal-700)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{background:#fff;color:var(--sl-700);border-color:var(--sl-200)}
+.btn-secondary:hover{background:var(--sl-50);border-color:var(--sl-300)}
+.btn-ghost{background:transparent;color:var(--teal-700);border:none;padding:9px 0}
+.btn-ghost:hover{text-decoration:underline}
+.btn-success{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bdr)}
+
+/* ══ BADGES ══ */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap}
+.badge .dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-ok{background:var(--ok-bg);color:var(--ok)}
+.badge-warn{background:var(--warn-bg);color:var(--warn)}
+.badge-crit{background:var(--crit-bg);color:var(--crit)}
+.badge-info{background:var(--info-bg);color:var(--info)}
+.badge-slate{background:var(--sl-100);color:var(--sl-600)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+
+/* ══ INFO CARD ══ */
+.info-card{background:#fff;border:1px solid var(--sl-200);border-radius:var(--r-md);padding:16px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.info-card.teal{border-left:3px solid var(--teal-600);background:var(--teal-50)}
+.info-card.warn{border-left:3px solid var(--warn);background:var(--warn-bg)}
+.info-card.ok{border-left:3px solid var(--ok);background:var(--ok-bg)}
+.info-card-title{font-size:12.5px;font-weight:700;color:var(--sl-800);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.info-card-body{font-size:12.5px;color:var(--sl-600);line-height:1.6}
+
+/* ══ ALERT BANNER ══ */
+.alert-banner{display:flex;gap:10px;padding:10px 14px;border-radius:var(--r-sm);margin-bottom:16px;font-size:12.5px;border:1px solid transparent;align-items:flex-start}
+.alert-banner.ok{background:var(--ok-bg);color:#065F46;border-color:var(--ok-bdr)}
+.alert-banner.warn{background:var(--warn-bg);color:#92400E;border-color:var(--warn-bdr)}
+.alert-banner.info{background:var(--info-bg);color:#075985;border-color:var(--info-bdr)}
+.alert-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.alert-title{font-weight:700;margin-bottom:1px}
+
+/* ══ STEP NAV FOOTER ══ */
+.step-footer{display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:16px;border-top:1px solid var(--sl-200)}
+.step-footer-info{font-size:12px;color:var(--sl-400)}
+
+/* ══ SUCCESS SCREEN ══ */
+.success-screen{text-align:center;padding:40px 20px}
+.success-icon{font-size:56px;margin-bottom:16px;animation:pop .4s cubic-bezier(.2,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.success-title{font-size:28px;font-weight:800;color:var(--teal-900);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--sl-500);margin-bottom:28px}
+.success-checklist{display:inline-flex;flex-direction:column;gap:8px;text-align:left;margin-bottom:28px}
+.success-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--sl-700)}
+.success-item .tick{color:var(--ok);font-size:16px;flex-shrink:0}
+
+/* ══ BUNDLE SELECTOR ══ */
+.bundle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:10px}
+.bundle-card{background:#fff;border:2px solid var(--sl-200);border-radius:var(--r-md);padding:14px 16px;cursor:pointer;transition:all .15s;text-align:left}
+.bundle-card:hover{border-color:var(--teal-300);background:var(--teal-50)}
+.bundle-card.selected{border-color:var(--teal-600);background:var(--teal-50);box-shadow:0 0 0 2px var(--teal-100)}
+.bundle-card-icon{font-size:20px;margin-bottom:6px}
+.bundle-card-name{font-size:12.5px;font-weight:700;color:var(--sl-800)}
+.bundle-card-desc{font-size:11px;color:var(--sl-400);margin-top:2px}
+.bundle-card-color{width:100%;height:3px;border-radius:2px;margin-bottom:10px}
+
+/* ══ PROGRESS BAR ══ */
+.progress-bar-wrap{height:4px;background:var(--sl-100);border-radius:2px;overflow:hidden;margin-top:10px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal-600),var(--teal-400));border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* ══ MONO ══ */
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal-700);background:var(--teal-50);padding:2px 5px;border-radius:4px;font-weight:500}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:24px;left:calc(var(--sidebar-w) + 50%);transform:translateX(-50%) translateY(80px);background:var(--sl-900);color:#fff;font-size:13px;font-weight:500;padding:11px 18px;border-radius:var(--r-md);box-shadow:var(--shadow-lg);z-index:999;transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:9px;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.toast-dot.warn{background:#fbbf24}
+.toast-dot.ok{background:#4ade80}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1000px){.step-rail{display:none}.sidebar{display:none}.main{margin-left:0}.tb-services{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<nav class="topbar">
+  <a class="tb-logo" href="b3-surface1-audit-review.html">
+    <div class="tb-logo-icon">🛡</div>B3 Platform
+  </a>
+  <span class="tb-bundle">Bundle 3</span>
+  <div class="tb-breadcrumb">
+    <span>Platform</span><span class="sep">/</span>
+    <span class="current">Onboarding Portal</span>
+  </div>
+  <div class="tb-services">
+    <span class="svc-pill"><span class="svc-dot ok"></span>PKI</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>APM</span>
+    <span class="svc-pill"><span class="svc-dot warn"></span>SIEM</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>Audit</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>NTP</span>
+  </div>
+  <div class="tb-right">
+    <button class="tb-icon-btn" title="Documentation">📖</button>
+    <button class="tb-icon-btn" title="Get help">💬</button>
+    <div class="tb-avatar" title="B1 Registries DevOps — Kamal P.">KP</div>
+  </div>
+</nav>
+
+<!-- ══ SHELL ══ -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-group-label">Platform</div>
+    <a class="sb-item" href="b3-surface1-audit-review.html"><span class="sb-icon">📊</span>Overview</a>
+    <a class="sb-item" href="b3-surface1-audit-review.html"><span class="sb-icon">🔍</span>Audit Review<span class="sb-badge crit">2</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">🔐</span>Certificates<span class="sb-badge warn">3</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">🚨</span>SIEM Alerts<span class="sb-badge crit">14</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">📈</span>APM Dashboards</a>
+    <a class="sb-item" href="#"><span class="sb-icon">🕐</span>NTP Monitor</a>
+    <div class="sb-divider"></div>
+    <div class="sb-group-label">Onboarding</div>
+    <a class="sb-item active" href="#"><span class="sb-icon">🏥</span>Register Facility</a>
+    <a class="sb-item" href="#"><span class="sb-icon">➕</span>All Facilities</a>
+    <div class="sb-divider"></div>
+    <div class="sb-group-label">Admin</div>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">⚙</span>Management Console</a>
+    <a class="sb-item" href="#"><span class="sb-icon">📋</span>Compliance Reports</a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="page-hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-eyebrow">D20 Connectathon Gate · D3 Connectathon · Scope Item 4 · Blueprint §6.2</div>
+          <div class="hero-title">Bundle Contractor Onboarding</div>
+          <div class="hero-desc">Connect your bundle to B3 Platform Services in 6 steps. Complete all steps to be Connectathon-ready. Progress is saved automatically — you can close and resume.</div>
+          <div class="progress-bar-wrap" style="max-width:520px;margin-top:10px">
+            <div class="progress-bar-fill" id="heroProgress" style="width:33%"></div>
+          </div>
+          <div style="font-size:11px;color:var(--sl-400);margin-top:5px">Step 3 of 6 in progress · <span id="heroProgressText">2 steps complete · 4 remaining</span></div>
+        </div>
+
+        <!-- Readiness score ring -->
+        <div class="readiness-wrap">
+          <div class="readiness-steps">
+            <div class="rs-step"><div class="rs-icon done">✓</div>Bundle registered</div>
+            <div class="rs-step"><div class="rs-icon done">✓</div>Certificate issued</div>
+            <div class="rs-step"><div class="rs-icon active">●</div>Wazuh agent</div>
+            <div class="rs-step"><div class="rs-icon pending">○</div>Prometheus config</div>
+            <div class="rs-step"><div class="rs-icon pending">○</div>AuditEvent test</div>
+            <div class="rs-step"><div class="rs-icon pending">○</div>NTP verified</div>
+          </div>
+          <div class="readiness-score">
+            <div class="score-ring">
+              <svg viewBox="0 0 72 72" width="76" height="76">
+                <circle class="score-track" cx="36" cy="36" r="32"/>
+                <circle class="score-fill" id="scoreRing" cx="36" cy="36" r="32"/>
+              </svg>
+              <div class="score-num">
+                <div class="score-pct" id="scorePct">33%</div>
+                <div class="score-label">Ready</div>
+              </div>
+            </div>
+            <div style="font-size:10px;color:var(--sl-400);margin-top:4px;text-align:center">Connectathon<br>Readiness</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CONTENT: STEP RAIL + PANELS ══ -->
+    <div class="content-area">
+
+      <!-- STEP RAIL -->
+      <div class="step-rail">
+        <div class="rail-section-label" style="margin-top:4px">B1 Registries · Kamal P.</div>
+
+        <div class="rail-step done" onclick="goStep(1)">
+          <div class="rail-step-left">
+            <div class="rail-node">✓</div>
+            <div class="rail-connector"></div>
+          </div>
+          <div class="rail-step-content">
+            <div class="rail-step-num">Step 1</div>
+            <div class="rail-step-title">Register Bundle</div>
+            <div class="rail-step-sub">B1 · LKA-B1-001</div>
+            <div class="rail-step-badge done">✓ Complete</div>
+          </div>
+        </div>
+
+        <div class="rail-step done" onclick="goStep(2)">
+          <div class="rail-step-left">
+            <div class="rail-node">✓</div>
+            <div class="rail-connector"></div>
+          </div>
+          <div class="rail-step-content">
+            <div class="rail-step-num">Step 2</div>
+            <div class="rail-step-title">Get Certificate</div>
+            <div class="rail-step-sub">MoH-Cert-B1-0012</div>
+            <div class="rail-step-badge done">✓ Issued</div>
+          </div>
+        </div>
+
+        <div class="rail-step active" onclick="goStep(3)">
+          <div class="rail-step-left">
+            <div class="rail-node">3</div>
+            <div class="rail-connector"></div>
+          </div>
+          <div class="rail-step-content">
+            <div class="rail-step-num">Step 3</div>
+            <div class="rail-step-title">Install Wazuh Agent</div>
+            <div class="rail-step-sub">SIEM-35 · Security</div>
+            <div class="rail-step-badge active">● In progress</div>
+          </div>
+        </div>
+
+        <div class="rail-step" onclick="goStep(4)">
+          <div class="rail-step-left">
+            <div class="rail-node">4</div>
+            <div class="rail-connector"></div>
+          </div>
+          <div class="rail-step-content">
+            <div class="rail-step-num">Step 4</div>
+            <div class="rail-step-title">Prometheus Config</div>
+            <div class="rail-step-sub">APM-22 · Metrics</div>
+            <div class="rail-step-badge pending">Pending</div>
+          </div>
+        </div>
+
+        <div class="rail-step" onclick="goStep(5)">
+          <div class="rail-step-left">
+            <div class="rail-node">5</div>
+            <div class="rail-connector"></div>
+          </div>
+          <div class="rail-step-content">
+            <div class="rail-step-num">Step 5</div>
+            <div class="rail-step-title">Test AuditEvent POST</div>
+            <div class="rail-step-sub">AR-43 · FHIR R4</div>
+            <div class="rail-step-badge pending">Pending</div>
+          </div>
+        </div>
+
+        <div class="rail-step" onclick="goStep(6)">
+          <div class="rail-step-left">
+            <div class="rail-node">6</div>
+          </div>
+          <div class="rail-step-content">
+            <div class="rail-step-num">Step 6</div>
+            <div class="rail-step-title">Verify NTP Sync</div>
+            <div class="rail-step-sub">TKS-34 · Timekeeping</div>
+            <div class="rail-step-badge pending">Pending</div>
+          </div>
+        </div>
+
+        <div style="padding:16px 18px;border-top:1px solid var(--sl-100);margin-top:8px">
+          <div style="font-size:10.5px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Need help?</div>
+          <a href="#" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--teal-600);text-decoration:none;margin-bottom:6px">📖 Integration Guide</a>
+          <a href="#" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--teal-600);text-decoration:none;margin-bottom:6px">💬 Slack: #b3-onboarding</a>
+          <a href="#" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--teal-600);text-decoration:none">📧 ravi.a@inova.lk</a>
+        </div>
+      </div>
+
+      <!-- ══ STEP PANELS ══ -->
+      <div class="step-content">
+
+        <!-- ── STEP 1: Register Bundle ── -->
+        <div class="step-panel" id="panel-1">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 1 of 6 · Completed</div>
+            <div class="step-title">Register Your Bundle</div>
+            <div class="step-desc">Provide your bundle details to receive a Bundle ID and mTLS namespace. This is a one-time registration that persists across sessions.</div>
+          </div>
+          <div class="alert-banner ok">
+            <span class="alert-icon">✓</span>
+            <div><div class="alert-title">Registration complete — Bundle ID: LKA-B1-001</div>Registered 10 July 2026 · B1 Registries · Kamal Perera · kamal.p@nhsl.lk</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">📋 Your Registration Details</div>
+            <div class="info-card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+              <div><div style="font-size:10px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em">Bundle ID</div><span class="mono">LKA-B1-001</span></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em">Bundle Name</div><div style="font-size:12.5px">B1 Registries</div></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em">Contact</div><div style="font-size:12.5px">Kamal Perera</div></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em">mTLS Namespace</div><span class="mono">b1.moh.lk</span></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em">IP Range</div><span class="mono">10.1.0.0/24</span></div>
+              <div><div style="font-size:10px;font-weight:700;color:var(--sl-400);text-transform:uppercase;letter-spacing:.06em">Registered</div><div style="font-size:12.5px">10 Jul 2026</div></div>
+            </div>
+          </div>
+          <div class="step-footer">
+            <span class="step-footer-info">Completed 10 Jul 2026 · 07:14 UTC</span>
+            <button class="btn btn-primary" onclick="goStep(2)">Continue to Step 2 →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2: Get Certificate ── -->
+        <div class="step-panel" id="panel-2">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 2 of 6 · Completed</div>
+            <div class="step-title">Get Your mTLS Certificate</div>
+            <div class="step-desc">Your bundle's TLS client certificate was issued by the B3 Step-CA. Use it for all mTLS connections to B3 services — HAPI FHIR, Wazuh Manager, Prometheus, and NTP.</div>
+          </div>
+          <div class="alert-banner ok">
+            <span class="alert-icon">✓</span>
+            <div><div class="alert-title">Certificate issued — MoH-Cert-B1-0012 · Valid until 10 Jul 2027</div>SHA-256 fingerprint: <span style="font-family:'JetBrains Mono',monospace;font-size:11px">4e:a3:c7:f1:09:ab:22:dd:…:8f</span></div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash — ACME certificate enrolment</span><button class="code-copy" onclick="copyCode(this,'cert-cmd')">⎘ Copy</button></div>
+            <div class="code-body" id="cert-cmd"><span class="c-comment"># Run on your B1 server — uses your Bundle ID and IP range</span>
+step ca bootstrap \
+  --ca-url <span class="c-hi">https://pki.b3.moh.gov.lk:9000</span> \
+  --fingerprint <span class="c-str">aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99</span>
+
+step ca certificate <span class="c-hi">b1.moh.lk</span> \
+  --provisioner acme \
+  --san <span class="c-hi">10.1.0.0/24</span> \
+  b1-client.crt b1-client.key</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">📥 Download your certificate files</div>
+            <div class="info-card-body">
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                <button class="btn btn-secondary" style="font-size:12px" onclick="toast('Downloading b1-client.crt…','ok')">⬇ b1-client.crt</button>
+                <button class="btn btn-secondary" style="font-size:12px" onclick="toast('Downloading b1-client.key…','ok')">⬇ b1-client.key</button>
+                <button class="btn btn-secondary" style="font-size:12px" onclick="toast('Downloading moh-root-ca.crt…','ok')">⬇ moh-root-ca.crt (trust this)</button>
+              </div>
+              <div class="form-hint" style="margin-top:8px">Store the .key file securely. Never commit it to version control. The Root CA cert must be trusted on all B1 servers that connect to B3.</div>
+            </div>
+          </div>
+          <div class="step-footer">
+            <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+            <button class="btn btn-primary" onclick="goStep(3)">Continue to Step 3 →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3: Wazuh Agent (ACTIVE) ── -->
+        <div class="step-panel active" id="panel-3">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 3 of 6 · In Progress</div>
+            <div class="step-title">Install Wazuh Agent</div>
+            <div class="step-desc">Install the Wazuh HIDS agent on all B1 Registries servers. The agent streams security events to the B3 SIEM. Required by SIEM-35 — brute-force and anomalous access detection.</div>
+          </div>
+
+          <div class="info-card teal">
+            <div class="info-card-title">🎯 What this step does</div>
+            <div class="info-card-body">Installs a lightweight agent (~50MB) that monitors system logs, file integrity, and network activity on your servers. Events are encrypted with your mTLS certificate and streamed to Wazuh Manager at <span class="mono">10.0.1.10:1514</span>. Your bundle data is isolated in the <span class="mono">B1-Registries</span> agent group.</div>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <div style="font-size:12px;font-weight:600;color:var(--sl-700);margin-bottom:8px">Select your operating system:</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap" id="osSelector">
+              <button class="btn btn-primary btn-os" data-os="ubuntu" onclick="selectOS('ubuntu',this)">Ubuntu 22.04 LTS</button>
+              <button class="btn btn-secondary btn-os" data-os="debian" onclick="selectOS('debian',this)">Debian 11/12</button>
+              <button class="btn btn-secondary btn-os" data-os="centos" onclick="selectOS('centos',this)">CentOS / RHEL 8+</button>
+            </div>
+          </div>
+
+          <div class="code-block" id="wazuh-code-block">
+            <div class="code-header"><span class="code-lang" id="wazuh-lang">bash · Ubuntu 22.04 LTS</span><button class="code-copy" onclick="copyCode(this,'wazuh-cmd')">⎘ Copy</button></div>
+            <div class="code-body" id="wazuh-cmd"><span class="c-comment"># 1. Add Wazuh repository</span>
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH \
+  | gpg --dearmor -o /usr/share/keyrings/wazuh.gpg
+echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] \
+  https://packages.wazuh.com/4.x/apt/ stable main" \
+  | tee /etc/apt/sources.list.d/wazuh.list
+
+<span class="c-comment"># 2. Install agent — pre-configured for B3 SIEM</span>
+apt-get update && apt-get install -y wazuh-agent=4.7.5-1
+
+<span class="c-comment"># 3. Configure and start (your Bundle ID pre-filled)</span>
+WAZUH_MANAGER=<span class="c-hi">10.0.1.10</span> \
+WAZUH_AGENT_GROUP=<span class="c-hi">B1-Registries</span> \
+WAZUH_AGENT_NAME=<span class="c-hi">b1-registries-prod-01</span> \
+systemctl enable --now wazuh-agent</div>
+          </div>
+
+          <!-- Live verification -->
+          <div class="verify-panel">
+            <div class="verify-header">
+              <div class="verify-title">🔍 Live Verification</div>
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:5px 12px" onclick="runVerify()" id="verifyBtn">Check Connection</button>
+            </div>
+            <div class="verify-body" id="verifyBody">
+              <div class="verify-row" id="vr1">
+                <div class="verify-icon">🌐</div>
+                <div class="verify-label">Agent reachable at <span class="mono">10.1.0.45</span></div>
+                <div class="verify-status pending" id="vs1">Waiting…</div>
+              </div>
+              <div class="verify-row" id="vr2">
+                <div class="verify-icon">🔐</div>
+                <div class="verify-label">mTLS handshake with MoH-Cert-B1-0012</div>
+                <div class="verify-status pending" id="vs2">Waiting…</div>
+              </div>
+              <div class="verify-row" id="vr3">
+                <div class="verify-icon">🏷</div>
+                <div class="verify-label">Agent group: <span class="mono">B1-Registries</span></div>
+                <div class="verify-status pending" id="vs3">Waiting…</div>
+              </div>
+              <div class="verify-row" id="vr4">
+                <div class="verify-icon">📡</div>
+                <div class="verify-label">First event received by Wazuh Manager</div>
+                <div class="verify-status pending" id="vs4">Waiting…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+            <button class="btn btn-primary" id="step3Next" onclick="goStep(4)" disabled>Verified — Continue to Step 4 →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 4: Prometheus ── -->
+        <div class="step-panel" id="panel-4">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 4 of 6</div>
+            <div class="step-title">Configure Prometheus Scraping</div>
+            <div class="step-desc">Expose a <span class="mono">/metrics</span> endpoint on your B1 servers. B3 Prometheus will scrape it every 15 seconds. Required by APM-22 — application performance monitoring for all DHP bundles.</div>
+          </div>
+
+          <div class="info-card teal">
+            <div class="info-card-title">🎯 What to expose</div>
+            <div class="info-card-body">Add the Prometheus client library to your B1 application. Expose these metric families: <span class="mono">http_requests_total</span>, <span class="mono">http_request_duration_seconds</span>, <span class="mono">process_cpu_seconds_total</span>, <span class="mono">process_resident_memory_bytes</span>. Port: <span class="mono">9090</span>. Path: <span class="mono">/metrics</span>.</div>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml — prometheus.yml scrape config to add</span><button class="code-copy" onclick="copyCode(this,'prom-cmd')">⎘ Copy</button></div>
+            <div class="code-body" id="prom-cmd"><span class="c-key">scrape_configs</span><span class="c-comment">:</span>
+  - <span class="c-key">job_name</span>: <span class="c-str">'b1-registries'</span>
+    <span class="c-key">scheme</span>: <span class="c-str">'https'</span>
+    <span class="c-key">tls_config</span>:
+      <span class="c-key">cert_file</span>: <span class="c-str">'/etc/b3-certs/b1-client.crt'</span>
+      <span class="c-key">key_file</span>:  <span class="c-str">'/etc/b3-certs/b1-client.key'</span>
+      <span class="c-key">ca_file</span>:   <span class="c-str">'/etc/b3-certs/moh-root-ca.crt'</span>
+    <span class="c-key">static_configs</span>:
+      - <span class="c-key">targets</span>:
+          - <span class="c-hi">'10.1.0.45:9090'</span>
+          - <span class="c-hi">'10.1.0.46:9090'</span>
+    <span class="c-key">scrape_interval</span>: <span class="c-str">'15s'</span>
+    <span class="c-key">labels</span>:
+      <span class="c-key">bundle</span>: <span class="c-str">'B1-Registries'</span>
+      <span class="c-key">bundle_id</span>: <span class="c-str">'LKA-B1-001'</span></div>
+          </div>
+
+          <div class="verify-panel">
+            <div class="verify-header">
+              <div class="verify-title">🔍 Live Verification</div>
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:5px 12px" onclick="runVerify4()" id="verifyBtn4">Check Metrics</button>
+            </div>
+            <div class="verify-body">
+              <div class="verify-row"><div class="verify-icon">📡</div><div class="verify-label"><span class="mono">/metrics</span> endpoint reachable at <span class="mono">10.1.0.45:9090</span></div><div class="verify-status pending" id="vs4a">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">🔐</div><div class="verify-label">mTLS certificate accepted</div><div class="verify-status pending" id="vs4b">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">📊</div><div class="verify-label">Required metric families present</div><div class="verify-status pending" id="vs4c">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">🏷</div><div class="verify-label">Labels: <span class="mono">bundle="B1-Registries"</span></div><div class="verify-status pending" id="vs4d">Waiting…</div></div>
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+            <button class="btn btn-primary" id="step4Next" onclick="goStep(5)" disabled>Verified — Continue to Step 5 →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 5: AuditEvent POST ── -->
+        <div class="step-panel" id="panel-5">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 5 of 6</div>
+            <div class="step-title">Test AuditEvent POST</div>
+            <div class="step-desc">Send a test FHIR R4 AuditEvent to the B3 Audit Repository. This confirms your mTLS certificate is accepted, your FHIR client is correctly configured, and events are being SHA-256 chained. Required by AR-43.</div>
+          </div>
+
+          <div class="info-card warn">
+            <div class="info-card-title">⚠ Use the TEST purposeOfEvent code</div>
+            <div class="info-card-body">In production, every AuditEvent must carry the correct <span class="mono">purposeOfEvent</span> code (ACCESS, CLINICAL, SECOPS, etc.) per PDPA §29. For this onboarding test, use <span class="mono">TEST</span> — these events are automatically excluded from compliance reports.</div>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash — FHIR AuditEvent POST test</span><button class="code-copy" onclick="copyCode(this,'audit-cmd')">⎘ Copy</button></div>
+            <div class="code-body" id="audit-cmd">curl -X POST https://<span class="c-hi">audit.b3.moh.gov.lk</span>/fhir/r4/AuditEvent \
+  --cert /etc/b3-certs/<span class="c-hi">b1-client.crt</span> \
+  --key  /etc/b3-certs/<span class="c-hi">b1-client.key</span> \
+  --cacert /etc/b3-certs/moh-root-ca.crt \
+  -H "Content-Type: application/fhir+json" \
+  -d '{
+    "resourceType": "AuditEvent",
+    "type": {
+      "system": "http://terminology.hl7.org/CodeSystem/audit-event-type",
+      "code": "110100",
+      "display": "Application Activity"
+    },
+    "action": "E",
+    "recorded": "<span class="c-str">2026-07-12T07:00:00Z</span>",
+    "outcome": "0",
+    "agent": [{ "requestor": true,
+      "network": { "address": "<span class="c-hi">10.1.0.45</span>", "type": "2" }}],
+    "source": { "site": "<span class="c-hi">LKA-B1-001</span>",
+      "observer": { "display": "<span class="c-hi">B1 Registries Onboarding Test</span>" }},
+    "purposeOfEvent": [{ "coding": [{ "code": "<span class="c-hi">TEST</span>" }]}]
+  }'
+
+<span class="c-comment"># Expected: HTTP 201 Created
+# Response will include: id, sha256-chain extension, chain position</span></div>
+          </div>
+
+          <div class="verify-panel">
+            <div class="verify-header">
+              <div class="verify-title">🔍 Live Verification</div>
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:5px 12px" onclick="runVerify5()" id="verifyBtn5">Verify POST</button>
+            </div>
+            <div class="verify-body">
+              <div class="verify-row"><div class="verify-icon">🔐</div><div class="verify-label">mTLS connection accepted</div><div class="verify-status pending" id="vs5a">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">📋</div><div class="verify-label">AuditEvent stored (HTTP 201)</div><div class="verify-status pending" id="vs5b">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">🔗</div><div class="verify-label">SHA-256 chain position assigned</div><div class="verify-status pending" id="vs5c">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">🏷</div><div class="verify-label">purposeOfEvent: TEST flagged correctly</div><div class="verify-status pending" id="vs5d">Waiting…</div></div>
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn btn-ghost" onclick="goStep(4)">← Back</button>
+            <button class="btn btn-primary" id="step5Next" onclick="goStep(6)" disabled>Verified — Continue to Step 6 →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 6: NTP Sync ── -->
+        <div class="step-panel" id="panel-6">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 6 of 6 · Final step</div>
+            <div class="step-title">Verify NTP Synchronisation</div>
+            <div class="step-desc">Configure your B1 servers to use the B3 NTP service. All DHP bundles must synchronise clocks to within ±50ms of UTC — AuditEvent timestamps and SIEM correlation depend on it. Required by TKS-34.</div>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">config — /etc/chrony.conf additions</span><button class="code-copy" onclick="copyCode(this,'ntp-cmd')">⎘ Copy</button></div>
+            <div class="code-body" id="ntp-cmd"><span class="c-comment"># Add to /etc/chrony.conf — replaces any existing pool lines</span>
+<span class="c-key">server</span> <span class="c-hi">ntp.b3.moh.gov.lk</span> iburst prefer
+<span class="c-key">server</span> <span class="c-hi">ntp2.b3.moh.gov.lk</span> iburst
+
+<span class="c-comment"># Lock to B3 NTP (recommended for DHP bundles)</span>
+<span class="c-key">makestep</span> 1.0 3
+<span class="c-key">maxdistance</span> 0.05
+
+<span class="c-comment"># Apply and verify</span>
+systemctl restart chronyd
+chronyc tracking</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-title">✓ Expected chronyc tracking output</div>
+            <div class="info-card-body">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.8;margin-top:6px;color:var(--sl-600)">
+                Reference ID    : <span style="color:var(--teal-700)">0A000B0A (ntp.b3.moh.gov.lk)</span><br>
+                System time     : <span style="color:var(--ok)">0.000012 seconds fast</span><br>
+                Last offset     : +0.000012 seconds<br>
+                RMS offset      : 0.000015 seconds<br>
+                Frequency       : 2.345 ppm fast<br>
+                Stratum         : <span style="color:var(--teal-700)">3</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="verify-panel">
+            <div class="verify-header">
+              <div class="verify-title">🔍 Live Verification</div>
+              <button class="btn btn-secondary" style="font-size:11.5px;padding:5px 12px" onclick="runVerify6()" id="verifyBtn6">Verify NTP Sync</button>
+            </div>
+            <div class="verify-body">
+              <div class="verify-row"><div class="verify-icon">🕐</div><div class="verify-label">NTP reachable: <span class="mono">ntp.b3.moh.gov.lk</span></div><div class="verify-status pending" id="vs6a">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">📏</div><div class="verify-label">Clock offset within ±50ms of UTC</div><div class="verify-status pending" id="vs6b">Waiting…</div></div>
+              <div class="verify-row"><div class="verify-icon">🔢</div><div class="verify-label">Stratum ≤ 4</div><div class="verify-status pending" id="vs6c">Waiting…</div></div>
+            </div>
+          </div>
+
+          <div class="step-footer">
+            <button class="btn btn-ghost" onclick="goStep(5)">← Back</button>
+            <button class="btn btn-primary" id="step6Next" onclick="completeOnboarding()" disabled>✓ Complete Onboarding →</button>
+          </div>
+        </div>
+
+        <!-- ── COMPLETE ── -->
+        <div class="step-panel" id="panel-complete">
+          <div class="success-screen">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">B1 Registries is Connectathon Ready!</div>
+            <div class="success-sub">All 6 steps verified. Your bundle is fully integrated with B3 Platform Services.</div>
+
+            <div class="success-checklist">
+              <div class="success-item"><span class="tick">✓</span>Bundle registered — ID: LKA-B1-001</div>
+              <div class="success-item"><span class="tick">✓</span>mTLS certificate issued — MoH-Cert-B1-0012</div>
+              <div class="success-item"><span class="tick">✓</span>Wazuh agent connected — B1-Registries group</div>
+              <div class="success-item"><span class="tick">✓</span>Prometheus scraping — /metrics live</div>
+              <div class="success-item"><span class="tick">✓</span>FHIR AuditEvent POST — chain position 1,247,833</div>
+              <div class="success-item"><span class="tick">✓</span>NTP synchronised — offset +12ms · Stratum 3</div>
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="toast('Downloading Connectathon readiness certificate…','ok')">⬇ Download Readiness Certificate</button>
+              <button class="btn btn-secondary" onclick="toast('Sharing status with B3 team…','ok')">📧 Notify B3 Team</button>
+              <a class="btn btn-secondary" href="b3-surface1-audit-review.html">← Back to Platform</a>
+            </div>
+
+            <div style="margin-top:28px;padding:14px 20px;background:var(--teal-50);border:1px solid var(--teal-100);border-radius:var(--r-md);max-width:480px;margin-left:auto;margin-right:auto;text-align:left">
+              <div style="font-size:11px;font-weight:700;color:var(--teal-600);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Next steps for Connectathon</div>
+              <div style="font-size:12.5px;color:var(--sl-600);line-height:1.7">
+                1. Share your Bundle ID <span class="mono">LKA-B1-001</span> with the UNOPS PM<br>
+                2. Attend the D20 Connectathon pre-flight on <strong>29 Oct 2026</strong><br>
+                3. Confirm your DevOps lead is available 31 Oct – 1 Nov 2026
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /step-content -->
+    </div><!-- /content-area -->
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"><span class="toast-dot" id="toastDot"></span><span id="toastMsg"></span></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let currentStep = 3;
+const stepStates = { 1:'done', 2:'done', 3:'active', 4:'pending', 5:'pending', 6:'pending' };
+const stepScore  = { 1:1, 2:1, 3:0, 4:0, 5:0, 6:0 }; // 1 = verified
+
+// ── Navigation ────────────────────────────────────────────
+function goStep(n) {
+  // Hide all panels
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + n);
+  if (!panel) return;
+  panel.classList.add('active');
+  currentStep = n;
+
+  // Update rail
+  document.querySelectorAll('.rail-step').forEach((s, i) => {
+    s.classList.remove('active','done','fail');
+    const state = stepStates[i+1];
+    if (state) s.classList.add(state);
+  });
+
+  // Scroll to top of content
+  document.querySelector('.step-content').scrollTo({ top: 0, behavior: 'smooth' });
+  updateScore();
+}
+
+function goComplete() {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-complete').classList.add('active');
+  updateScore(true);
+}
+
+// ── Score ring ────────────────────────────────────────────
+function updateScore(complete) {
+  const total = complete ? 6 : Object.values(stepScore).reduce((a,b)=>a+b,0);
+  const pct = Math.round((total / 6) * 100);
+  const circumference = 2 * Math.PI * 32; // r=32
+  const offset = circumference - (pct / 100) * circumference;
+
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreRing').style.strokeDashoffset = offset;
+  document.getElementById('scoreRing').style.strokeDasharray = circumference;
+
+  const fill = document.getElementById('scoreRing');
+  fill.classList.remove('warn','done');
+  if (pct === 100) fill.classList.add('done');
+  else if (pct >= 50) fill.classList.add('warn');
+
+  document.getElementById('heroProgress').style.width = pct + '%';
+  const remaining = 6 - total;
+  document.getElementById('heroProgressText').textContent =
+    total + ' step' + (total!==1?'s':'') + ' complete · ' + remaining + ' remaining';
+}
+
+// ── OS selector ───────────────────────────────────────────
+const osCmds = {
+  ubuntu: {
+    lang: 'bash · Ubuntu 22.04 LTS',
+    cmd: `<span class="c-comment"># 1. Add Wazuh repository</span>
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH \\
+  | gpg --dearmor -o /usr/share/keyrings/wazuh.gpg
+echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] \\
+  https://packages.wazuh.com/4.x/apt/ stable main" \\
+  | tee /etc/apt/sources.list.d/wazuh.list
+
+<span class="c-comment"># 2. Install agent</span>
+apt-get update && apt-get install -y wazuh-agent=4.7.5-1
+
+<span class="c-comment"># 3. Configure and start</span>
+WAZUH_MANAGER=<span class="c-hi">10.0.1.10</span> \\
+WAZUH_AGENT_GROUP=<span class="c-hi">B1-Registries</span> \\
+WAZUH_AGENT_NAME=<span class="c-hi">b1-registries-prod-01</span> \\
+systemctl enable --now wazuh-agent`
+  },
+  debian: {
+    lang: 'bash · Debian 11/12',
+    cmd: `<span class="c-comment"># 1. Add Wazuh repository (Debian)</span>
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH \\
+  | gpg --dearmor -o /usr/share/keyrings/wazuh.gpg
+echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] \\
+  https://packages.wazuh.com/4.x/apt/ stable main" \\
+  | tee /etc/apt/sources.list.d/wazuh.list
+
+apt-get update && apt-get install -y wazuh-agent=4.7.5-1
+
+WAZUH_MANAGER=<span class="c-hi">10.0.1.10</span> \\
+WAZUH_AGENT_GROUP=<span class="c-hi">B1-Registries</span> \\
+systemctl enable --now wazuh-agent`
+  },
+  centos: {
+    lang: 'bash · CentOS / RHEL 8+',
+    cmd: `<span class="c-comment"># 1. Add Wazuh repository (RPM)</span>
+rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH
+cat > /etc/yum.repos.d/wazuh.repo << EOF
+[wazuh]
+baseurl=https://packages.wazuh.com/4.x/yum/
+enabled=1
+gpgcheck=1
+EOF
+
+<span class="c-comment"># 2. Install agent</span>
+dnf install -y wazuh-agent-4.7.5-1
+
+<span class="c-comment"># 3. Configure and start</span>
+WAZUH_MANAGER=<span class="c-hi">10.0.1.10</span> \\
+WAZUH_AGENT_GROUP=<span class="c-hi">B1-Registries</span> \\
+systemctl enable --now wazuh-agent`
+  }
+};
+
+function selectOS(os, btn) {
+  document.querySelectorAll('.btn-os').forEach(b => {
+    b.className = b === btn ? 'btn btn-primary btn-os' : 'btn btn-secondary btn-os';
+  });
+  document.getElementById('wazuh-lang').textContent = osCmds[os].lang;
+  document.getElementById('wazuh-cmd').innerHTML = osCmds[os].cmd;
+}
+
+// ── Live verification (simulated) ─────────────────────────
+function runVerify() {
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+
+  const checks = [
+    { id:'vs1', delay:600,  text:'✓ Connected',     fail:false },
+    { id:'vs2', delay:1400, text:'✓ TLS 1.3 OK',    fail:false },
+    { id:'vs3', delay:2000, text:'✓ Group confirmed',fail:false },
+    { id:'vs4', delay:2800, text:'✓ Event received', fail:false },
+  ];
+
+  checks.forEach(c => {
+    document.getElementById(c.id).className = 'verify-status checking';
+    document.getElementById(c.id).innerHTML = '<span class="spinner"></span>Checking…';
+    setTimeout(() => {
+      document.getElementById(c.id).className = 'verify-status ok';
+      document.getElementById(c.id).textContent = c.text;
+    }, c.delay);
+  });
+
+  setTimeout(() => {
+    btn.textContent = '✓ All checks passed';
+    btn.className = 'btn btn-success';
+    stepStates[3] = 'done';
+    stepScore[3] = 1;
+    document.getElementById('step3Next').disabled = false;
+    document.getElementById('step3Next').className = 'btn btn-primary';
+    updateRailStep(3, 'done');
+    updateReadinessIcon(3, 'done');
+    updateScore();
+    toast('✓ Wazuh agent verified — B1-Registries connected', 'ok');
+  }, 3200);
+}
+
+function runVerify4() {
+  const btn = document.getElementById('verifyBtn4');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const ids = ['vs4a','vs4b','vs4c','vs4d'];
+  const labels = ['✓ 200 OK','✓ Cert accepted','✓ 4 families found','✓ Labels correct'];
+  ids.forEach((id, i) => {
+    document.getElementById(id).className = 'verify-status checking';
+    document.getElementById(id).innerHTML = '<span class="spinner"></span>Checking…';
+    setTimeout(() => {
+      document.getElementById(id).className = 'verify-status ok';
+      document.getElementById(id).textContent = labels[i];
+    }, 700 * (i+1));
+  });
+  setTimeout(() => {
+    btn.textContent = '✓ All checks passed'; btn.className = 'btn btn-success';
+    stepStates[4]='done'; stepScore[4]=1;
+    document.getElementById('step4Next').disabled=false;
+    updateRailStep(4,'done'); updateReadinessIcon(4,'done'); updateScore();
+    toast('✓ Prometheus metrics verified','ok');
+  }, 3200);
+}
+
+function runVerify5() {
+  const btn = document.getElementById('verifyBtn5');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const ids = ['vs5a','vs5b','vs5c','vs5d'];
+  const labels = ['✓ TLS 1.3','✓ HTTP 201 Created','✓ Position: 1,247,833','✓ TEST flagged'];
+  ids.forEach((id, i) => {
+    document.getElementById(id).className = 'verify-status checking';
+    document.getElementById(id).innerHTML = '<span class="spinner"></span>Checking…';
+    setTimeout(() => {
+      document.getElementById(id).className = 'verify-status ok';
+      document.getElementById(id).textContent = labels[i];
+    }, 600 * (i+1));
+  });
+  setTimeout(() => {
+    btn.textContent = '✓ All checks passed'; btn.className = 'btn btn-success';
+    stepStates[5]='done'; stepScore[5]=1;
+    document.getElementById('step5Next').disabled=false;
+    updateRailStep(5,'done'); updateReadinessIcon(5,'done'); updateScore();
+    toast('✓ FHIR AuditEvent verified — chain position 1,247,833','ok');
+  }, 2800);
+}
+
+function runVerify6() {
+  const btn = document.getElementById('verifyBtn6');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const ids = ['vs6a','vs6b','vs6c'];
+  const labels = ['✓ Reachable','✓ Offset: +12ms','✓ Stratum 3'];
+  ids.forEach((id, i) => {
+    document.getElementById(id).className = 'verify-status checking';
+    document.getElementById(id).innerHTML = '<span class="spinner"></span>Checking…';
+    setTimeout(() => {
+      document.getElementById(id).className = 'verify-status ok';
+      document.getElementById(id).textContent = labels[i];
+    }, 700 * (i+1));
+  });
+  setTimeout(() => {
+    btn.textContent = '✓ All checks passed'; btn.className = 'btn btn-success';
+    stepStates[6]='done'; stepScore[6]=1;
+    document.getElementById('step6Next').disabled=false;
+    updateRailStep(6,'done'); updateReadinessIcon(6,'done'); updateScore();
+    toast('✓ NTP synchronised — offset +12ms · Stratum 3','ok');
+  }, 2600);
+}
+
+// ── Rail + Readiness icon updates ──────────────────────────
+function updateRailStep(n, state) {
+  const steps = document.querySelectorAll('.rail-step');
+  if (steps[n-1]) {
+    steps[n-1].classList.remove('active','done','fail','pending');
+    steps[n-1].classList.add(state);
+    const badge = steps[n-1].querySelector('.rail-step-badge');
+    if (badge) {
+      badge.className = 'rail-step-badge ' + state;
+      badge.textContent = state === 'done' ? '✓ Complete' : state;
+    }
+    const node = steps[n-1].querySelector('.rail-node');
+    if (node && state === 'done') node.textContent = '✓';
+  }
+}
+
+function updateReadinessIcon(n, state) {
+  const icons = document.querySelectorAll('.rs-icon');
+  if (icons[n-1]) {
+    icons[n-1].className = 'rs-icon ' + state;
+    icons[n-1].textContent = state === 'done' ? '✓' : (state === 'active' ? '●' : '○');
+  }
+}
+
+// ── Complete onboarding ────────────────────────────────────
+function completeOnboarding() {
+  stepStates[6] = 'done';
+  [1,2,3,4,5,6].forEach(i => updateRailStep(i,'done'));
+  goComplete();
+  toast('🎉 Onboarding complete — B1 Registries is Connectathon ready!','ok');
+}
+
+// ── Copy code ──────────────────────────────────────────────
+function copyCode(btn, id) {
+  const el = document.getElementById(id);
+  const text = el ? el.innerText : '';
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => { btn.textContent = '⎘ Copy'; });
+}
+
+// ── Toast ──────────────────────────────────────────────────
+function toast(msg, type) {
+  const el = document.getElementById('toastEl');
+  const dot = document.getElementById('toastDot');
+  document.getElementById('toastMsg').textContent = msg;
+  dot.className = 'toast-dot' + (type==='warn'?' warn':'');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ── Init ───────────────────────────────────────────────────
+updateScore();
+// Set score ring dash
+const circ = 2 * Math.PI * 32;
+document.getElementById('scoreRing').style.strokeDasharray = circ;
+document.getElementById('scoreRing').style.strokeDashoffset = circ - (0.33 * circ);
+</script>
+</body>
+</html>

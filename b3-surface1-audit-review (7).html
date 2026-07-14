@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Review — B3 Platform Support Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   B3 DESIGN TOKENS
+───────────────────────────────────────────── */
+:root {
+  --teal-50:  #F0FDFA;
+  --teal-100: #CCFBF1;
+  --teal-200: #99F6E4;
+  --teal-300: #5EEAD4;
+  --teal-500: #14B8A6;
+  --teal-600: #0D9488;
+  --teal-700: #0F766E;
+  --teal-800: #115E59;
+  --teal-900: #134E4A;
+
+  --sky-100: #E0F2FE;
+  --sky-600: #0284C7;
+  --sky-700: #0369A1;
+
+  --sl-50:  #F8FAFC;
+  --sl-100: #F1F5F9;
+  --sl-200: #E2E8F0;
+  --sl-300: #CBD5E1;
+  --sl-400: #94A3B8;
+  --sl-500: #64748B;
+  --sl-600: #475569;
+  --sl-700: #334155;
+  --sl-800: #1E293B;
+  --sl-900: #0F172A;
+
+  --ok:       #0D9488; --ok-bg:   #CCFBF1; --ok-bdr: #99F6E4;
+  --warn:     #D97706; --warn-bg: #FEF3C7; --warn-bdr: #FCD34D;
+  --crit:     #DC2626; --crit-bg: #FEE2E2; --crit-bdr: #FCA5A5;
+  --info:     #0284C7; --info-bg: #E0F2FE; --info-bdr: #7DD3FC;
+  --purple:   #7C3AED; --purple-bg: #EDE9FE;
+
+  --topbar-h: 56px;
+  --sidebar-w: 220px;
+  --filter-w: 256px;
+  --drawer-w: 420px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --shadow-sm: 0 1px 3px rgba(15,118,110,.08), 0 1px 2px rgba(15,118,110,.06);
+  --shadow-md: 0 4px 16px rgba(15,118,110,.10);
+  --shadow-lg: 0 12px 40px rgba(15,118,110,.14);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--teal-50);
+  color: var(--sl-800);
+  font-size: 13.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   TOP BAR
+───────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--teal-900);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 16px;
+  z-index: 200;
+  box-shadow: 0 2px 0 rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.14);
+}
+
+.tb-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  flex-shrink: 0;
+  text-decoration: none;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255,255,255,.15);
+}
+.tb-logo-icon {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.tb-bundle {
+  margin-left: 14px;
+  background: var(--teal-600);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.tb-breadcrumb {
+  margin-left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.65);
+  font-size: 12.5px;
+}
+.tb-breadcrumb .sep { opacity: .4; }
+.tb-breadcrumb .current {
+  color: #fff;
+  font-weight: 600;
+}
+.tb-services {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+  padding: 0 14px;
+}
+.svc-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.85);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px 3px 7px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.15);
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.svc-pill:hover { background: rgba(255,255,255,.18); }
+.svc-pill.active { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.35); }
+.svc-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+}
+.svc-dot.warn { background: #fbbf24; }
+.svc-dot.crit { background: #f87171; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.5} }
+.svc-dot.ok { animation: pulse-dot 2.5s infinite; }
+
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: 2px;
+  margin-right: 4px;
+}
+.lang-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.55);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Inter', sans-serif;
+}
+.lang-btn:hover { color: rgba(255,255,255,.85); }
+.lang-btn.active { background: rgba(255,255,255,.20); color: #fff; }
+
+.tb-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-left: 1px solid rgba(255,255,255,.12);
+}
+.tb-icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.10);
+  border: none;
+  color: rgba(255,255,255,.85);
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .15s;
+  position: relative;
+  flex-shrink: 0;
+}
+.tb-icon-btn:hover { background: rgba(255,255,255,.20); }
+.tb-notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  background: #f87171;
+  border-radius: 50%;
+  border: 2px solid var(--teal-700);
+}
+.tb-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--teal-500);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,.25);
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────
+   LAYOUT SHELL
+───────────────────────────────────────────── */
+.shell {
+  display: flex;
+  padding-top: var(--topbar-h);
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────
+   LEFT SIDEBAR NAV
+───────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid var(--sl-200);
+  position: fixed;
+  top: var(--topbar-h);
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
+  padding: 16px 0 24px;
+  z-index: 100;
+}
+.sb-group-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--sl-400);
+  padding: 14px 16px 5px;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  color: var(--sl-600);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .12s;
+  text-decoration: none;
+}
+.sb-item:hover { background: var(--teal-50); color: var(--teal-700); }
+.sb-item.active {
+  background: var(--teal-50);
+  color: var(--teal-700);
+  border-left-color: var(--teal-600);
+  font-weight: 600;
+}
+.sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.sb-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.sb-badge.crit { background: var(--crit-bg); color: var(--crit); }
+.sb-badge.ok   { background: var(--ok-bg);   color: var(--ok);   }
+.sb-badge.warn { background: var(--warn-bg); color: var(--warn); }
+
+.sb-divider {
+  height: 1px;
+  background: var(--sl-100);
+  margin: 8px 16px;
+}
+
+/* ─────────────────────────────────────────────
+   MAIN CONTENT AREA
+───────────────────────────────────────────── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: margin-right .25s;
+}
+.main.drawer-open {
+  margin-right: var(--drawer-w);
+}
+
+/* ─────────────────────────────────────────────
+   PAGE HERO — AUDIT REVIEW
+   Gradient: topbar colour (teal-900) at top,
+   fading to near-white at bottom. The topbar
+   melts into the hero — no forced hard edge.
+   Stats sit in a frosted teal-50 band that
+   bridges hero → body content below.
+───────────────────────────────────────────── */
+.page-hero {
+  background: linear-gradient(
+    180deg,
+    #ffffff   0%,
+    #f4fdfb  55%,
+    var(--teal-50) 100%
+  );
+  border-bottom: 1px solid var(--teal-100);
+  padding: 20px 28px 0;
+  position: relative;
+}
+/* Thin teal top-edge stripe — brand anchor without filling the whole hero */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal-700) 0%, var(--teal-400) 55%, transparent 100%);
+  pointer-events: none;
+}
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-top: 6px;
+}
+.hero-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--teal-600);
+  margin-bottom: 4px;
+}
+.hero-title {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--teal-900);
+  letter-spacing: -.02em;
+  margin-bottom: 3px;
+}
+.hero-desc {
+  font-size: 12.5px;
+  color: var(--sl-500);
+  max-width: 480px;
+}
+.hero-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* Stats band — sits flush at the bottom of the hero */
+.hero-stats {
+  display: flex;
+  gap: 0;
+  background: rgba(13,148,136,.06);
+  border-top: 1px solid var(--teal-100);
+  margin: 0 -28px;
+  overflow: hidden;
+}
+.hero-stat {
+  padding: 11px 22px;
+  border-right: 1px solid var(--teal-100);
+  min-width: 110px;
+  flex: 1;
+}
+.hero-stat:last-child { border-right: none; }
+.hs-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--teal-900);
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.hs-val.warn { color: var(--warn); }
+.hs-val.crit { color: var(--crit); }
+.hs-label {
+  font-size: 10px;
+  color: var(--sl-500);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-top: 3px;
+  font-weight: 700;
+}
+.hs-trend {
+  font-size: 10px;
+  color: var(--sl-400);
+  margin-top: 1px;
+}
+
+/* ─────────────────────────────────────────────
+   TOOLBAR / FILTER BAR
+───────────────────────────────────────────── */
+.toolbar {
+  background: #fff;
+  border-bottom: 1px solid var(--sl-200);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: var(--topbar-h);
+  z-index: 90;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+}
+.search-icon {
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--sl-400);
+  font-size: 14px;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--sl-800);
+  background: var(--sl-50);
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-sm);
+  padding: 7px 10px 7px 32px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.search-input:focus {
+  border-color: var(--teal-400);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+  background: #fff;
+}
+.search-input::placeholder { color: var(--sl-400); }
+
+.filter-select {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: var(--sl-700);
+  background: var(--sl-50);
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.filter-select:focus { border-color: var(--teal-400); }
+
+.toolbar-divider { width: 1px; height: 24px; background: var(--sl-200); flex-shrink: 0; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 7px 13px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all .14s;
+  white-space: nowrap;
+  line-height: 1;
+}
+.btn-primary { background: var(--teal-600); color: #fff; border-color: var(--teal-600); }
+.btn-primary:hover { background: var(--teal-700); }
+.btn-secondary { background: #fff; color: var(--sl-700); border-color: var(--sl-200); }
+.btn-secondary:hover { background: var(--sl-50); border-color: var(--sl-300); }
+.btn-ghost { background: transparent; color: var(--teal-700); border-color: transparent; }
+.btn-ghost:hover { background: var(--teal-50); }
+.btn-danger { background: var(--crit-bg); color: var(--crit); border-color: var(--crit-bdr); }
+.btn-danger:hover { background: #fee2e2; }
+.btn-sm { padding: 5px 10px; font-size: 11.5px; }
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--teal-100);
+  color: var(--teal-800);
+  border: 1px solid var(--teal-200);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.active-filter-chip:hover { background: var(--teal-200); }
+
+.results-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--sl-400);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────
+   CONTENT AREA (filter panel + table)
+───────────────────────────────────────────── */
+.content-wrap {
+  display: flex;
+  flex: 1;
+  padding: 16px;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+/* ─────────────────────────────────────────────
+   FILTER PANEL (left)
+───────────────────────────────────────────── */
+.filter-panel {
+  width: var(--filter-w);
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  position: sticky;
+  top: calc(var(--topbar-h) + 56px);
+}
+.fp-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--sl-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fp-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sl-700);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.fp-clear { font-size: 11px; color: var(--teal-600); cursor: pointer; font-weight: 500; }
+.fp-clear:hover { text-decoration: underline; }
+
+.fp-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--sl-100);
+}
+.fp-section:last-child { border-bottom: none; }
+.fp-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--sl-400);
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  margin-bottom: 8px;
+}
+
+/* Date range */
+.date-range { display: flex; flex-direction: column; gap: 5px; }
+.date-input-wrap { position: relative; }
+.date-label-inline {
+  position: absolute;
+  left: 8px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--sl-400);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  pointer-events: none;
+}
+input.date-input {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--sl-700);
+  background: var(--sl-50);
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-sm);
+  padding: 6px 8px 6px 38px;
+  outline: none;
+  transition: border-color .15s;
+}
+input.date-input:focus { border-color: var(--teal-400); box-shadow: 0 0 0 3px rgba(13,148,136,.10); }
+
+/* Checkbox group */
+.check-list { display: flex; flex-direction: column; gap: 5px; }
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--sl-600);
+  padding: 3px 4px;
+  border-radius: 5px;
+  transition: background .1s;
+}
+.check-item:hover { background: var(--teal-50); color: var(--teal-700); }
+.check-item input[type="checkbox"] { accent-color: var(--teal-600); width: 14px; height: 14px; }
+.check-count {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--sl-400);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Severity pills row */
+.sev-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.sev-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all .12s;
+}
+.sev-pill.ok    { background: var(--ok-bg);   color: var(--ok);   border-color: var(--ok-bdr);   }
+.sev-pill.warn  { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-bdr); }
+.sev-pill.crit  { background: var(--crit-bg); color: var(--crit); border-color: var(--crit-bdr); }
+.sev-pill.info  { background: var(--info-bg); color: var(--info); border-color: var(--info-bdr); }
+.sev-pill:hover { opacity: .80; }
+.sev-pill.selected { box-shadow: 0 0 0 2px currentColor; }
+
+/* Facility search mini */
+.facility-search {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  background: var(--sl-50);
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  outline: none;
+  color: var(--sl-700);
+  margin-bottom: 6px;
+}
+.facility-search:focus { border-color: var(--teal-400); }
+
+/* PDPA purpose */
+.purpose-list { display: flex; flex-direction: column; gap: 4px; }
+.purpose-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--sl-600);
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 5px;
+}
+.purpose-item:hover { background: var(--teal-50); }
+.purpose-item input[type="checkbox"] { accent-color: var(--teal-600); width: 13px; height: 13px; }
+.purpose-tag {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--sl-400);
+}
+
+/* ─────────────────────────────────────────────
+   AUDIT EVENT TABLE
+───────────────────────────────────────────── */
+.table-wrap {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--sl-100);
+  background: #fff;
+}
+.th-left { display: flex; flex-direction: column; }
+.th-title { font-size: 13.5px; font-weight: 700; color: var(--teal-900); }
+.th-sub { font-size: 11px; color: var(--sl-400); margin-top: 1px; }
+.th-right { display: flex; gap: 7px; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+thead {
+  background: var(--sl-50);
+  border-bottom: 1px solid var(--sl-200);
+}
+th {
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--sl-400);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover { color: var(--teal-700); }
+th.sorted { color: var(--teal-700); }
+.sort-arrow { margin-left: 3px; opacity: .6; }
+
+td {
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--sl-700);
+  border-bottom: 1px solid var(--sl-100);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr.event-row { cursor: pointer; transition: background .1s; }
+tr.event-row:hover td { background: var(--teal-50); }
+tr.event-row.selected td {
+  background: var(--teal-100);
+  border-bottom-color: var(--teal-200);
+}
+tr.event-row.selected td:first-child {
+  border-left: 3px solid var(--teal-600);
+  padding-left: 9px;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--teal-700);
+  background: var(--teal-50);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.mono.hash {
+  color: var(--sl-500);
+  background: var(--sl-100);
+  font-size: 10.5px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.badge .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.badge-ok    { background: var(--ok-bg);     color: var(--ok);     }
+.badge-warn  { background: var(--warn-bg);   color: var(--warn);   }
+.badge-crit  { background: var(--crit-bg);   color: var(--crit);   }
+.badge-info  { background: var(--info-bg);   color: var(--info);   }
+.badge-purple{ background: var(--purple-bg); color: var(--purple); }
+.badge-slate { background: var(--sl-100);    color: var(--sl-600); }
+
+.action-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--sl-700);
+}
+.action-icon { font-size: 13px; }
+
+.reviewer-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+}
+.rv-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.rv-dot.cleared { background: var(--ok); }
+.rv-dot.flagged { background: var(--crit); }
+.rv-dot.pending { background: var(--sl-300); }
+
+.facility-name {
+  font-size: 12.5px;
+  color: var(--sl-700);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.facility-id {
+  font-size: 10.5px;
+  color: var(--sl-400);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 1px;
+}
+
+.row-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity .15s;
+}
+tr.event-row:hover .row-actions { opacity: 1; }
+tr.event-row.selected .row-actions { opacity: 1; }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--sl-100);
+  background: var(--sl-50);
+}
+.pg-info { font-size: 12px; color: var(--sl-400); }
+.pg-controls { display: flex; gap: 4px; }
+.pg-btn {
+  width: 30px; height: 30px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--sl-200);
+  background: #fff;
+  color: var(--sl-600);
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.pg-btn:hover { background: var(--teal-50); border-color: var(--teal-300); color: var(--teal-700); }
+.pg-btn.active { background: var(--teal-600); border-color: var(--teal-600); color: #fff; }
+.pg-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ─────────────────────────────────────────────
+   DETAIL DRAWER (right)
+───────────────────────────────────────────── */
+.detail-drawer {
+  position: fixed;
+  top: var(--topbar-h);
+  right: 0;
+  bottom: 0;
+  width: var(--drawer-w);
+  background: #fff;
+  border-left: 1px solid var(--sl-200);
+  box-shadow: var(--shadow-lg);
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.detail-drawer.open {
+  transform: translateX(0);
+}
+.drawer-header {
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--sl-100);
+  background: var(--teal-50);
+  flex-shrink: 0;
+}
+.drawer-close {
+  float: right;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--sl-200);
+  background: #fff;
+  color: var(--sl-500);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.drawer-close:hover { background: var(--crit-bg); color: var(--crit); border-color: var(--crit-bdr); }
+.drawer-eyebrow {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--teal-600);
+  margin-bottom: 3px;
+}
+.drawer-event-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--teal-900);
+  margin-bottom: 6px;
+}
+.drawer-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* drawer-body defined in UX improvements block with scroll fade */
+
+.detail-section { margin-bottom: 20px; }
+.detail-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--sl-400);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.detail-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--sl-100);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.detail-field { display: flex; flex-direction: column; gap: 2px; }
+.detail-field.full { grid-column: 1 / -1; }
+.df-label { font-size: 10px; font-weight: 700; color: var(--sl-400); text-transform: uppercase; letter-spacing: .06em; }
+.df-value { font-size: 12.5px; color: var(--sl-800); font-weight: 500; }
+.df-value.mono-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--teal-800);
+  background: var(--teal-50);
+  padding: 4px 7px;
+  border-radius: 5px;
+  word-break: break-all;
+  line-height: 1.6;
+}
+.df-value.hash-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--sl-500);
+  background: var(--sl-100);
+  padding: 4px 7px;
+  border-radius: 5px;
+  word-break: break-all;
+  line-height: 1.6;
+}
+
+/* FHIR JSON viewer */
+.json-viewer {
+  background: var(--sl-900);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #e2e8f0;
+  overflow-x: auto;
+  white-space: pre;
+}
+.json-key   { color: #93c5fd; }
+.json-str   { color: #86efac; }
+.json-num   { color: #fbbf24; }
+.json-bool  { color: #f87171; }
+.json-null  { color: #94a3b8; }
+
+/* Review actions */
+.review-actions {
+  padding: 14px 18px;
+  border-top: 1px solid var(--sl-100);
+  background: var(--sl-50);
+  flex-shrink: 0;
+}
+.review-actions-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--sl-400);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 8px;
+}
+.review-btn-row { display: flex; gap: 8px; }
+.btn-clear {
+  flex: 1;
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1.5px solid var(--ok-bdr);
+  font-weight: 700;
+}
+.btn-clear:hover { background: #a7f3d0; }
+.btn-flag {
+  flex: 1;
+  background: var(--crit-bg);
+  color: var(--crit);
+  border: 1.5px solid var(--crit-bdr);
+  font-weight: 700;
+}
+.btn-flag:hover { background: #fecaca; }
+
+textarea.reviewer-note {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--sl-700);
+  background: #fff;
+  border: 1px solid var(--sl-200);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  outline: none;
+  resize: none;
+  transition: border-color .15s;
+  margin-bottom: 8px;
+}
+textarea.reviewer-note:focus {
+  border-color: var(--teal-400);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.10);
+}
+
+/* Chain integrity indicator */
+.chain-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-bdr);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: #065f46;
+  margin-bottom: 10px;
+}
+.chain-icon { font-size: 15px; }
+
+
+/* ─────────────────────────────────────────────
+   UX IMPROVEMENTS
+───────────────────────────────────────────── */
+
+/* 1. Unreviewed rows — left amber urgency stripe */
+tr.event-row.unreviewed td:first-child {
+  border-left: 3px solid var(--warn);
+  padding-left: 9px;
+}
+tr.event-row.flagged-row td:first-child {
+  border-left: 3px solid var(--crit);
+  padding-left: 9px;
+}
+tr.event-row.unreviewed td { background: #fffbeb; }
+tr.event-row.unreviewed:hover td { background: #fef3c7; }
+tr.event-row.flagged-row td { background: #fff8f8; }
+tr.event-row.flagged-row:hover td { background: #fee2e2; }
+
+/* 2. Bulk clear — disabled state */
+.btn-primary:disabled {
+  opacity: .38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 3. Filter active count badge */
+.fp-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--teal-600);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* 4. Drawer prev/next navigation */
+.drawer-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.drawer-nav-btn {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--sl-200);
+  background: #fff;
+  color: var(--sl-500);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+  flex-shrink: 0;
+}
+.drawer-nav-btn:hover:not(:disabled) {
+  background: var(--teal-50);
+  border-color: var(--teal-300);
+  color: var(--teal-700);
+}
+.drawer-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+.drawer-nav-pos {
+  font-size: 11px;
+  color: var(--sl-400);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.drawer-header-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* 5. Drawer scroll fade — hint that content continues */
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 18px;
+  position: relative;
+}
+.drawer-body::after {
+  content: '';
+  position: sticky;
+  bottom: 0;
+  display: block;
+  height: 32px;
+  margin: -32px -18px 0;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.9));
+  pointer-events: none;
+}
+
+/* 6. Toast — shift left of drawer when drawer open */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: calc(var(--sidebar-w) + 50%);
+  transform: translateX(-50%) translateY(80px);
+  background: var(--sl-900);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 11px 18px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  transition: transform .3s cubic-bezier(.4,0,.2,1), left .25s;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.drawer-open-toast {
+  left: calc(var(--sidebar-w) + (100vw - var(--sidebar-w) - var(--drawer-w)) / 2);
+}
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+.toast-dot.warn { background: #fbbf24; }
+.toast-dot.crit { background: #f87171; }
+
+/* 7. Keyboard focus ring — visible for power users */
+:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
+}
+
+/* 8. Clear note button */
+.note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.note-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--sl-400);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.note-clear-btn {
+  font-size: 10.5px;
+  color: var(--sl-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+.note-clear-btn:hover { color: var(--crit); }
+
+/* 9. Selected row count display in toolbar */
+.selection-bar {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: var(--teal-900);
+  color: #fff;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: var(--r-sm);
+}
+.selection-bar.visible { display: flex; }
+.selection-bar .sel-count {
+  background: rgba(255,255,255,.2);
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+/* 10. Escape hint in drawer */
+.drawer-esc-hint {
+  font-size: 10px;
+  color: var(--sl-400);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  background: var(--sl-100);
+  border: 1px solid var(--sl-300);
+  border-bottom-width: 2px;
+  color: var(--sl-500);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sl-300); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sl-400); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+@media (max-width: 1100px) {
+  .filter-panel { display: none; }
+  .tb-services { display: none; }
+}
+@media (max-width: 800px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  :root { --drawer-w: 100vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════ -->
+<nav class="topbar">
+  <a class="tb-logo" href="b3-surface1-audit-review.html">
+    <div class="tb-logo-icon">🛡</div>
+    B3 Platform
+  </a>
+  <span class="tb-bundle">Bundle 3</span>
+
+  <div class="tb-breadcrumb">
+    <span data-i18n="nav.platform">Platform</span>
+    <span class="sep">/</span>
+    <span class="current" data-i18n="nav.auditReview">Audit Review</span>
+  </div>
+
+  <div class="tb-services">
+    <span class="svc-pill"><span class="svc-dot ok"></span>PKI</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>APM</span>
+    <span class="svc-pill warn"><span class="svc-dot warn"></span>SIEM</span>
+    <span class="svc-pill active"><span class="svc-dot ok"></span>Audit</span>
+    <span class="svc-pill"><span class="svc-dot ok"></span>NTP</span>
+  </div>
+
+  <div class="tb-right">
+    <div class="lang-switch" role="group" aria-label="Language selector">
+      <button class="lang-btn active" data-lang="en" onclick="setLang('en')" aria-pressed="true">EN</button>
+      <button class="lang-btn" data-lang="si" onclick="setLang('si')" aria-pressed="false">සිං</button>
+      <button class="lang-btn" data-lang="ta" onclick="setLang('ta')" aria-pressed="false">தமி</button>
+    </div>
+    <button class="tb-icon-btn" title="Alerts">
+      🔔
+      <span class="tb-notif-dot"></span>
+    </button>
+    <button class="tb-icon-btn" title="Export PDF">📄</button>
+    <button class="tb-icon-btn" title="Settings">⚙</button>
+    <div class="tb-avatar" title="Privacy Officer — Hirandi W.">HW</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     LAYOUT SHELL
+════════════════════════════════════════ -->
+<div class="shell">
+
+  <!-- SIDEBAR NAV -->
+  <aside class="sidebar">
+    <div class="sb-group-label" data-i18n="nav.platform">Platform</div>
+    <a class="sb-item" href="#"><span class="sb-icon">📊</span> <span data-i18n="nav.overview">Overview</span></a>
+    <a class="sb-item active" href="#"><span class="sb-icon">🔍</span> <span data-i18n="nav.auditReview">Audit Review</span> <span class="sb-badge crit">2</span></a>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">🔐</span> <span data-i18n="nav.certificates">Certificates</span> <span class="sb-badge warn">3</span></a>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">🚨</span> <span data-i18n="nav.siemAlerts">SIEM Alerts</span> <span class="sb-badge crit">14</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">📈</span> <span data-i18n="nav.apmDashboards">APM Dashboards</span> <span class="sb-badge ok">↗</span></a>
+    <a class="sb-item" href="#"><span class="sb-icon">🕐</span> <span data-i18n="nav.ntpMonitor">NTP Monitor</span></a>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-group-label" data-i18n="nav.onboarding">Onboarding</div>
+    <a class="sb-item" href="b3-surface3-onboarding-portal.html"><span class="sb-icon">🔌</span> <span data-i18n="nav.allBundles">All Bundles</span> <span class="sb-badge warn">1</span></a>
+    <a class="sb-item" href="b3-surface3-onboarding-portal.html"><span class="sb-icon">➕</span> <span data-i18n="nav.registerBundle">Register Bundle</span></a>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-group-label" data-i18n="nav.admin">Admin</div>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">👥</span> <span data-i18n="nav.userManagement">User Management</span></a>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">🔑</span> <span data-i18n="nav.roles">Roles &amp; Permissions</span></a>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">📋</span> <span data-i18n="nav.complianceReports">Compliance Reports</span></a>
+    <a class="sb-item" href="b3-surface2-management-console.html"><span class="sb-icon">⚙</span> <span data-i18n="nav.managementConsole">Management Console</span></a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="mainContent">
+
+    <!-- PAGE HERO -->
+    <div class="page-hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-eyebrow">AR-43 · FHIR R4 AuditEvent · PDPA §29 · WCAG 2.1 AA</div>
+          <div class="hero-title" data-i18n="hero.title">Audit Event Review</div>
+          <div class="hero-desc" data-i18n="hero.desc">Review and clear FHIR AuditEvent records for compliance. SHA-256 hash chaining ensures tamper-proof integrity. All actions are logged back into the repository.</div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-secondary" onclick="showToast('Generating PDPA §29 compliance report…', 'ok')"><span data-i18n="btn.exportReport">📄 Export Report</span></button>
+          <button class="btn btn-primary" data-i18n="btn.downloadCrl">⬇ Download CRL</button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hs-val">1,842</div>
+          <div class="hs-label" data-i18n="stat.eventsToday">Events Today</div>
+          <div class="hs-trend">↑ 204 vs yesterday</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-val">14</div>
+          <div class="hs-label" data-i18n="stat.facilities">Facilities</div>
+          <div class="hs-trend">All reporting</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-val warn">2</div>
+          <div class="hs-label" data-i18n="stat.unreviewed">Unreviewed</div>
+          <div class="hs-trend">Action needed</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-val crit">1</div>
+          <div class="hs-label" data-i18n="stat.flagged">Flagged</div>
+          <div class="hs-trend">SIEM-35 trigger</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-val">100%</div>
+          <div class="hs-label" data-i18n="stat.chainIntegrity">Chain Integrity</div>
+          <div class="hs-trend">SHA-256 verified</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BREAK-GLASS BANNER — AR-08/09 -->
+    <div style="margin:14px 20px 0;background:var(--crit-bg);border:1px solid var(--crit-bdr);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12.5px">
+      <span style="font-size:15px">⚠</span>
+      <div style="flex:1"><strong data-i18n="breakglass.title" style="color:var(--crit)">Break-Glass (ETREAT) events require immediate review.</strong> <span data-i18n="breakglass.desc">Detection triggers an instant alert to the Privacy Officer, a mandatory post-hoc justification field, and a 24-hour review SLA.</span></div>
+      <button class="btn btn-sm" style="background:var(--crit);color:#fff;border:none;flex-shrink:0" onclick="document.querySelectorAll('.purpose-item')[6].querySelector('input').checked=true;showToast('Filtered to Break-Glass (ETREAT) events','crit')" data-i18n="breakglass.filter">Filter ETREAT →</button>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" placeholder="Search by event ID, facility, user, action…" />
+      </div>
+
+      <select class="filter-select">
+        <option>All action types</option>
+        <option>PHI access</option>
+        <option>Login / Logout</option>
+        <option>Certificate ops</option>
+        <option>Config change</option>
+        <option>System event</option>
+      </select>
+
+      <select class="filter-select">
+        <option>All review status</option>
+        <option>Unreviewed</option>
+        <option>Cleared</option>
+        <option>Flagged</option>
+      </select>
+
+      <div class="toolbar-divider"></div>
+
+      <span class="active-filter-chip" onclick="this.remove()">Date: Today ✕</span>
+      <span class="active-filter-chip" onclick="this.remove()">Severity: Critical ✕</span>
+
+      <div class="results-count">Showing <strong>1–25</strong> of <strong>1,842</strong> events</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-wrap">
+
+      <!-- FILTER PANEL -->
+      <div class="filter-panel">
+        <div class="fp-header">
+          <span class="fp-title" data-i18n="filter.filters">Filters</span>
+          <span class="fp-clear">Clear all</span>
+        </div>
+
+        <!-- Date range -->
+        <div class="fp-section">
+          <div class="fp-section-label" data-i18n="filter.dateTime">Date &amp; Time (UTC)</div>
+          <div class="date-range">
+            <div class="date-input-wrap">
+              <span class="date-label-inline">FROM</span>
+              <input class="date-input" type="datetime-local" value="2026-07-12T00:00" />
+            </div>
+            <div class="date-input-wrap">
+              <span class="date-label-inline">TO</span>
+              <input class="date-input" type="datetime-local" value="2026-07-12T23:59" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div class="fp-section">
+          <div class="fp-section-label" data-i18n="filter.severity">Severity</div>
+          <div class="sev-pills">
+            <span class="sev-pill crit selected">Critical</span>
+            <span class="sev-pill warn">Warning</span>
+            <span class="sev-pill ok">Info</span>
+            <span class="sev-pill slate" style="background:var(--sl-100);color:var(--sl-600);border-color:var(--sl-200);">Low</span>
+          </div>
+        </div>
+
+        <!-- Facility -->
+        <div class="fp-section">
+          <div class="fp-section-label" data-i18n="filter.facility">Facility</div>
+          <input class="facility-search" placeholder="Search facilities…" />
+          <div class="check-list">
+            <label class="check-item"><input type="checkbox" checked /> Colombo National <span class="check-count">487</span></label>
+            <label class="check-item"><input type="checkbox" checked /> Karapitiya Teaching <span class="check-count">312</span></label>
+            <label class="check-item"><input type="checkbox" /> Jaffna Teaching <span class="check-count">244</span></label>
+            <label class="check-item"><input type="checkbox" /> Point Pedro Base <span class="check-count">198</span></label>
+            <label class="check-item"><input type="checkbox" /> Kurunegala Teaching <span class="check-count">167</span></label>
+            <label class="check-item"><input type="checkbox" /> Kandy Teaching <span class="check-count">155</span></label>
+            <label class="check-item" style="color:var(--teal-600);"><input type="checkbox" /> + 8 more facilities <span class="check-count">279</span></label>
+          </div>
+        </div>
+
+        <!-- PDPA Purpose -->
+        <div class="fp-section">
+          <div class="fp-section-label" data-i18n="filter.purpose">PDPA Purpose of Event</div>
+          <div class="purpose-list">
+            <label class="purpose-item"><input type="checkbox" checked /> <span data-i18n="purpose.access">PHI Access</span> <span class="purpose-tag">ACCESS</span></label>
+            <label class="purpose-item"><input type="checkbox" checked /> <span data-i18n="purpose.clinical">Clinical Decision</span> <span class="purpose-tag">CLINICAL</span></label>
+            <label class="purpose-item"><input type="checkbox" /> <span data-i18n="purpose.admin">System Admin</span> <span class="purpose-tag">ADMIN</span></label>
+            <label class="purpose-item"><input type="checkbox" /> <span data-i18n="purpose.audit">Audit / Review</span> <span class="purpose-tag">AUDIT</span></label>
+            <label class="purpose-item"><input type="checkbox" /> <span data-i18n="purpose.secops">Security Ops</span> <span class="purpose-tag">SECOPS</span></label>
+            <label class="purpose-item"><input type="checkbox" /> <span data-i18n="purpose.research">Research (Anonymised)</span> <span class="purpose-tag">RESEARCH</span></label>
+            <label class="purpose-item" style="background:var(--crit-bg);border-radius:6px;padding:4px 6px;margin:2px -6px"><input type="checkbox" /> <span data-i18n="purpose.etreat" style="color:var(--crit);font-weight:700">⚠ Break-Glass (Emergency)</span> <span class="purpose-tag" style="background:var(--crit-bg);color:var(--crit)">ETREAT</span></label>
+          </div>
+        </div>
+
+        <!-- Review status -->
+        <div class="fp-section">
+          <div class="fp-section-label" data-i18n="filter.reviewStatus">Review Status</div>
+          <div class="check-list">
+            <label class="check-item"><input type="checkbox" checked /> Unreviewed <span class="check-count">2</span></label>
+            <label class="check-item"><input type="checkbox" checked /> Flagged <span class="check-count">1</span></label>
+            <label class="check-item"><input type="checkbox" /> Cleared <span class="check-count">1,839</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="th-left">
+            <div class="th-title" data-i18n="table.title">AuditEvent Log</div>
+            <div class="th-sub">FHIR R4 · AR-43 · SHA-256 hash-chained · Immutable</div>
+          </div>
+          <div class="th-right">
+            <div class="selection-bar" id="selectionBar">
+              <span class="sel-count" id="selCount">0</span> selected
+              <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.2);" onclick="bulkClear()">✓ Clear Selected</button>
+              <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.15);" onclick="clearSelection()">✕ Deselect</button>
+            </div>
+            <button class="btn btn-secondary btn-sm">⚙ Columns</button>
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Exporting CSV…', 'ok')">⬇ Export CSV</button>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:4%;"><input type="checkbox" style="accent-color:var(--teal-600);width:13px;height:13px;" /></th>
+              <th class="sorted" style="width:10%;">Event ID <span class="sort-arrow">↓</span></th>
+              <th style="width:14%;">Timestamp (UTC)</th>
+              <th style="width:16%;">Facility</th>
+              <th style="width:19%;">Action Type</th>
+              <th style="width:12%;">Initiated By</th>
+              <th style="width:9%;">Severity</th>
+              <th style="width:9%;">Review</th>
+              <th style="width:7%;"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- Row 1 — FLAGGED (selected / drawer open) -->
+            <tr class="event-row flagged-row selected" data-idx="0" onclick="rowClick(this, event)">
+              <td><input type="checkbox" checked style="accent-color:var(--teal-600);width:13px;height:13px;" onclick="event.stopPropagation()" /></td>
+              <td><span class="mono">AE-00913</span></td>
+              <td style="white-space:nowrap;">
+                <div style="font-size:12.5px;font-weight:600;color:var(--sl-800);">02:14:01</div>
+                <div style="font-size:10.5px;color:var(--sl-400);">12 Jul 2026</div>
+              </td>
+              <td>
+                <div class="facility-name">Karapitiya Teaching</div>
+                <div class="facility-id">LKA-HFR-0018</div>
+              </td>
+              <td>
+                <div class="action-type">
+                  <span class="action-icon">🔐</span>
+                  <span>PHI Access</span>
+                </div>
+                <div style="font-size:10.5px;color:var(--sl-400);margin-top:1px;">12 failed login attempts</div>
+              </td>
+              <td>
+                <div style="font-size:12.5px;">System</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400);">10.8.2.201</div>
+              </td>
+              <td><span class="badge badge-crit"><span class="dot"></span> Critical</span></td>
+              <td>
+                <div class="reviewer-status">
+                  <span class="rv-dot flagged"></span>
+                  <span style="color:var(--crit);font-weight:600;font-size:11.5px;">Flagged</span>
+                </div>
+                <div style="font-size:10px;color:var(--sl-400);margin-top:1px;">HW · 07:32</div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation()">View</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 2 — UNREVIEWED -->
+            <tr class="event-row unreviewed" data-idx="1" onclick="rowClick(this, event)">
+              <td><input type="checkbox" style="accent-color:var(--teal-600);width:13px;height:13px;" onclick="event.stopPropagation()" /></td>
+              <td><span class="mono">AE-00914</span></td>
+              <td style="white-space:nowrap;">
+                <div style="font-size:12.5px;font-weight:600;color:var(--sl-800);">07:14:22</div>
+                <div style="font-size:10.5px;color:var(--sl-400);">12 Jul 2026</div>
+              </td>
+              <td>
+                <div class="facility-name">Colombo National</div>
+                <div class="facility-id">LKA-HFR-0042</div>
+              </td>
+              <td>
+                <div class="action-type"><span class="action-icon">📋</span> PHI Access</div>
+                <div style="font-size:10.5px;color:var(--sl-400);margin-top:1px;">Patient record read — unusual hour</div>
+              </td>
+              <td>
+                <div style="font-size:12.5px;">Dr. K. Bandara</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400);">usr-0241</div>
+              </td>
+              <td><span class="badge badge-warn"><span class="dot"></span> Warning</span></td>
+              <td>
+                <div class="reviewer-status">
+                  <span class="rv-dot pending"></span>
+                  <span style="color:var(--sl-400);font-size:11.5px;">Unreviewed</span>
+                </div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation()">View</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 3 — CLEARED -->
+            <tr class="event-row" data-idx="2" onclick="rowClick(this, event)">
+              <td><input type="checkbox" style="accent-color:var(--teal-600);width:13px;height:13px;" onclick="event.stopPropagation()" /></td>
+              <td><span class="mono">AE-00912</span></td>
+              <td style="white-space:nowrap;">
+                <div style="font-size:12.5px;color:var(--sl-700);">01:58:44</div>
+                <div style="font-size:10.5px;color:var(--sl-400);">12 Jul 2026</div>
+              </td>
+              <td>
+                <div class="facility-name">Jaffna Teaching</div>
+                <div class="facility-id">LKA-HFR-0007</div>
+              </td>
+              <td>
+                <div class="action-type"><span class="action-icon">🔐</span> Cert Issued</div>
+                <div style="font-size:10.5px;color:var(--sl-400);margin-top:1px;">TLS Client · MoH-Cert-PKI-0241</div>
+              </td>
+              <td>
+                <div style="font-size:12.5px;">Ravi A.</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400);">usr-0004</div>
+              </td>
+              <td><span class="badge badge-info"><span class="dot"></span> Info</span></td>
+              <td>
+                <div class="reviewer-status">
+                  <span class="rv-dot cleared"></span>
+                  <span style="color:var(--ok);font-weight:600;font-size:11.5px;">Cleared</span>
+                </div>
+                <div style="font-size:10px;color:var(--sl-400);margin-top:1px;">HW · 06:10</div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation()">View</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 4 — CLEARED -->
+            <tr class="event-row" data-idx="3" onclick="rowClick(this, event)">
+              <td><input type="checkbox" style="accent-color:var(--teal-600);width:13px;height:13px;" onclick="event.stopPropagation()" /></td>
+              <td><span class="mono">AE-00911</span></td>
+              <td style="white-space:nowrap;">
+                <div style="font-size:12.5px;color:var(--sl-700);">01:00:00</div>
+                <div style="font-size:10.5px;color:var(--sl-400);">12 Jul 2026</div>
+              </td>
+              <td>
+                <div class="facility-name">Point Pedro Base</div>
+                <div class="facility-id">LKA-HFR-0031</div>
+              </td>
+              <td>
+                <div class="action-type"><span class="action-icon">🕐</span> NTP Sync</div>
+                <div style="font-size:10.5px;color:var(--sl-400);margin-top:1px;">Drift: +12ms · UTC verified</div>
+              </td>
+              <td>
+                <div style="font-size:12.5px;">System / NTP</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400);">svc-ntp</div>
+              </td>
+              <td><span class="badge badge-ok"><span class="dot"></span> Info</span></td>
+              <td>
+                <div class="reviewer-status">
+                  <span class="rv-dot cleared"></span>
+                  <span style="color:var(--ok);font-weight:600;font-size:11.5px;">Cleared</span>
+                </div>
+                <div style="font-size:10px;color:var(--sl-400);margin-top:1px;">Auto · 01:00</div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation()">View</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr class="event-row" data-idx="4" onclick="rowClick(this, event)">
+              <td><input type="checkbox" style="accent-color:var(--teal-600);width:13px;height:13px;" onclick="event.stopPropagation()" /></td>
+              <td><span class="mono">AE-00910</span></td>
+              <td style="white-space:nowrap;">
+                <div style="font-size:12.5px;color:var(--sl-700);">00:47:12</div>
+                <div style="font-size:10.5px;color:var(--sl-400);">12 Jul 2026</div>
+              </td>
+              <td>
+                <div class="facility-name">Kurunegala Teaching</div>
+                <div class="facility-id">LKA-HFR-0022</div>
+              </td>
+              <td>
+                <div class="action-type"><span class="action-icon">🔒</span> Login</div>
+                <div style="font-size:10.5px;color:var(--sl-400);margin-top:1px;">Successful · TLSv1.3</div>
+              </td>
+              <td>
+                <div style="font-size:12.5px;">Nurse P. Wijesinghe</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400);">usr-1104</div>
+              </td>
+              <td><span class="badge badge-ok"><span class="dot"></span> Low</span></td>
+              <td>
+                <div class="reviewer-status">
+                  <span class="rv-dot cleared"></span>
+                  <span style="color:var(--ok);font-weight:600;font-size:11.5px;">Cleared</span>
+                </div>
+                <div style="font-size:10px;color:var(--sl-400);margin-top:1px;">Auto · 00:47</div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation()">View</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr class="event-row" data-idx="5" onclick="rowClick(this, event)">
+              <td><input type="checkbox" style="accent-color:var(--teal-600);width:13px;height:13px;" onclick="event.stopPropagation()" /></td>
+              <td><span class="mono">AE-00909</span></td>
+              <td style="white-space:nowrap;">
+                <div style="font-size:12.5px;color:var(--sl-700);">00:31:05</div>
+                <div style="font-size:10.5px;color:var(--sl-400);">12 Jul 2026</div>
+              </td>
+              <td>
+                <div class="facility-name">Kandy Teaching</div>
+                <div class="facility-id">LKA-HFR-0011</div>
+              </td>
+              <td>
+                <div class="action-type"><span class="action-icon">📤</span> PHI Export</div>
+                <div style="font-size:10.5px;color:var(--sl-400);margin-top:1px;">Anonymised · purposeOfEvent: RESEARCH</div>
+              </td>
+              <td>
+                <div style="font-size:12.5px;">Dr. S. Perera</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--sl-400);">usr-0388</div>
+              </td>
+              <td><span class="badge badge-warn"><span class="dot"></span> Warning</span></td>
+              <td>
+                <div class="reviewer-status">
+                  <span class="rv-dot cleared"></span>
+                  <span style="color:var(--ok);font-weight:600;font-size:11.5px;">Cleared</span>
+                </div>
+                <div style="font-size:10px;color:var(--sl-400);margin-top:1px;">HW · 06:55</div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation()">View</button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+          <div class="pg-info">Page 1 of 74 · 1,842 events</div>
+          <div class="pg-controls">
+            <button class="pg-btn" disabled>‹</button>
+            <button class="pg-btn active">1</button>
+            <button class="pg-btn">2</button>
+            <button class="pg-btn">3</button>
+            <span style="padding:0 4px;color:var(--sl-400);font-size:12px;align-self:center;">…</span>
+            <button class="pg-btn">74</button>
+            <button class="pg-btn">›</button>
+          </div>
+        </div>
+      </div><!-- /table-wrap -->
+
+    </div><!-- /content-wrap -->
+
+  </main><!-- /main -->
+
+</div><!-- /shell -->
+
+<!-- ═══════════════════════════════════════
+     DETAIL DRAWER — AE-00913
+════════════════════════════════════════ -->
+<div class="detail-drawer open" id="detailDrawer">
+
+  <div class="drawer-header">
+    <div class="drawer-header-top">
+      <div>
+        <div class="drawer-eyebrow">FHIR AuditEvent · AR-43</div>
+        <div class="drawer-event-id" id="drawerEventId">AE-00913</div>
+      </div>
+      <div class="drawer-nav">
+        <span class="drawer-esc-hint"><kbd class="kbd">Esc</kbd> close · <kbd class="kbd">↑↓</kbd> navigate</span>
+        <button class="drawer-nav-btn" id="drawerPrev" title="Previous event (↑)" onclick="navigateDrawer(-1)">↑</button>
+        <span class="drawer-nav-pos" id="drawerPos">1 / 6</span>
+        <button class="drawer-nav-btn" id="drawerNext" title="Next event (↓)" onclick="navigateDrawer(1)">↓</button>
+        <button class="drawer-close" onclick="closeDrawer()" title="Close (Esc)">✕</button>
+      </div>
+    </div>
+    <div class="drawer-badges">
+      <span class="badge badge-crit"><span class="dot"></span> Critical</span>
+      <span class="badge badge-purple">SIEM-35 trigger</span>
+      <span class="badge badge-slate">PHI Access</span>
+      <span class="badge" style="background:var(--crit-bg);color:var(--crit);">Flagged by HW</span>
+    </div>
+  </div>
+
+  <div class="drawer-body">
+
+    <!-- Chain integrity -->
+    <div class="chain-indicator">
+      <span class="chain-icon">🔗</span>
+      SHA-256 chain intact · This event and all prior events verified · No tampering detected
+    </div>
+
+    <!-- Core details -->
+    <div class="detail-section">
+      <div class="detail-section-label">Event Details</div>
+      <div class="detail-grid">
+        <div class="detail-field">
+          <div class="df-label">Timestamp (UTC)</div>
+          <div class="df-value">12 Jul 2026 · 02:14:01.442Z</div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">Recorded (UTC)</div>
+          <div class="df-value">12 Jul 2026 · 02:14:01.891Z</div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">Action</div>
+          <div class="df-value">E — Execute (Login attempt)</div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">Outcome</div>
+          <div class="df-value" style="color:var(--crit);font-weight:600;">8 — Serious failure</div>
+        </div>
+        <div class="detail-field full">
+          <div class="df-label">Outcome Description</div>
+          <div class="df-value">12 consecutive failed authentication attempts from 10.8.2.201 within 3-minute window. SIEM-35 brute-force threshold exceeded. Wazuh rule #110124 fired.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent / Source -->
+    <div class="detail-section">
+      <div class="detail-section-label">Agent & Source</div>
+      <div class="detail-grid">
+        <div class="detail-field">
+          <div class="df-label">Facility</div>
+          <div class="df-value">Karapitiya Teaching Hospital</div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">HFR Code</div>
+          <div class="df-value mono-val">LKA-HFR-0018</div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">Source IP</div>
+          <div class="df-value mono-val">10.8.2.201</div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">Target IP</div>
+          <div class="df-value mono-val">10.0.1.45:443</div>
+        </div>
+        <div class="detail-field full">
+          <div class="df-label">Agent Network Access Point</div>
+          <div class="df-value mono-val">type: 2 (IP address) · identifier: 10.8.2.201</div>
+        </div>
+        <div class="detail-field full">
+          <div class="df-label">Certificate Used (Initiating Party)</div>
+          <div class="df-value mono-val">MoH-Cert-PKI-0047 · EXPIRED 15 Jun 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDPA -->
+    <div class="detail-section">
+      <div class="detail-section-label">PDPA §29 Purpose Classification</div>
+      <div class="detail-grid">
+        <div class="detail-field">
+          <div class="df-label">Purpose of Event</div>
+          <div class="df-value"><span class="badge badge-crit">SECOPS</span></div>
+        </div>
+        <div class="detail-field">
+          <div class="df-label">Data Classification</div>
+          <div class="df-value">No PHI accessed (auth failure)</div>
+        </div>
+        <div class="detail-field full">
+          <div class="df-label">PDPA Implication</div>
+          <div class="df-value">Brute-force attempt on a system holding PHI. Must be reported to MoH Data Protection Officer within 72h if evidence of data breach found. No PHI was accessed in this event.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHA-256 hash -->
+    <div class="detail-section">
+      <div class="detail-section-label">Hash Chain</div>
+      <div class="detail-field" style="margin-bottom:8px;">
+        <div class="df-label">This Event Hash (SHA-256)</div>
+        <div class="df-value hash-val">a7f3c2e1d8b9044f12cc3a7e9b21f8d6e4c1a0b3f7e2d9c8b5a1e0f3d7c2b9a4</div>
+      </div>
+      <div class="detail-field">
+        <div class="df-label">Previous Event Hash (AE-00912)</div>
+        <div class="df-value hash-val">9b4e1f2c7a0d3e8b5c2f9a4d1e6b3c0f7a2e5d8b1c4f7a0e3d6b9c2f5a8e1d4b7</div>
+      </div>
+    </div>
+
+    <!-- FHIR JSON -->
+    <div class="detail-section">
+      <div class="detail-section-label">FHIR R4 Resource</div>
+      <div class="json-viewer"><span class="json-key">"resourceType"</span>: <span class="json-str">"AuditEvent"</span>,
+<span class="json-key">"id"</span>: <span class="json-str">"AE-00913"</span>,
+<span class="json-key">"type"</span>: {
+  <span class="json-key">"system"</span>: <span class="json-str">"http://terminology.hl7.org/CodeSystem/audit-event-type"</span>,
+  <span class="json-key">"code"</span>: <span class="json-str">"110114"</span>,
+  <span class="json-key">"display"</span>: <span class="json-str">"User Authentication"</span>
+},
+<span class="json-key">"action"</span>: <span class="json-str">"E"</span>,
+<span class="json-key">"recorded"</span>: <span class="json-str">"2026-07-12T02:14:01.891Z"</span>,
+<span class="json-key">"outcome"</span>: <span class="json-str">"8"</span>,
+<span class="json-key">"outcomeDesc"</span>: <span class="json-str">"12 failed auth attempts · brute-force"</span>,
+<span class="json-key">"purposeOfEvent"</span>: [{ <span class="json-key">"code"</span>: <span class="json-str">"SECOPS"</span> }],
+<span class="json-key">"agent"</span>: [{
+  <span class="json-key">"requestor"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"network"</span>: { <span class="json-key">"address"</span>: <span class="json-str">"10.8.2.201"</span>, <span class="json-key">"type"</span>: <span class="json-str">"2"</span> }
+}],
+<span class="json-key">"source"</span>: {
+  <span class="json-key">"site"</span>: <span class="json-str">"LKA-HFR-0018"</span>,
+  <span class="json-key">"observer"</span>: { <span class="json-key">"display"</span>: <span class="json-str">"Karapitiya Teaching Hospital"</span> }
+},
+<span class="json-key">"extension"</span>: [{
+  <span class="json-key">"url"</span>: <span class="json-str">"sha256-chain"</span>,
+  <span class="json-key">"valueString"</span>: <span class="json-str">"a7f3c2e1d8b90…"</span>
+}]</div>
+    </div>
+
+  </div><!-- /drawer-body -->
+
+  <!-- REVIEW ACTIONS -->
+  <div class="review-actions">
+    <div class="review-actions-label">Privacy Officer Review — AR-43</div>
+    <div class="note-header">
+      <span class="note-label">Review note</span>
+      <button class="note-clear-btn" onclick="document.getElementById('reviewNote').value=''" title="Clear note">Clear ✕</button>
+    </div>
+    <textarea class="reviewer-note" id="reviewNote" rows="2" placeholder="Add a review note (required for Flag action)…">Brute-force attempt from expired cert. Escalated to SOC. No PHI accessed — monitoring for 24h.</textarea>
+    <div class="review-btn-row">
+      <button class="btn btn-clear" onclick="showToast('✓ AE-00913 cleared and logged', 'ok')">✓ Clear Event</button>
+      <button class="btn btn-flag" onclick="showToast('⚑ AE-00913 remains flagged — SOC notified', 'crit')">⚑ Keep Flagged</button>
+    </div>
+  </div>
+
+</div><!-- /detail-drawer -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-dot"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+const rows = Array.from(document.querySelectorAll('tr.event-row'));
+let currentIdx = 0; // AE-00913 is open by default
+let checkedRows = new Set();
+
+/* ── Row click: open drawer without triggering on checkbox ── */
+function rowClick(row, e) {
+  // If click was on checkbox cell, don't open drawer
+  if (e.target.type === 'checkbox') return;
+  const idx = parseInt(row.dataset.idx);
+  selectRow(idx);
+  openDrawer(idx);
+}
+
+/* ── Select a row visually ── */
+function selectRow(idx) {
+  rows.forEach(r => r.classList.remove('selected'));
+  rows[idx].classList.add('selected');
+  currentIdx = idx;
+  updateDrawerNav();
+}
+
+/* ── Open drawer and set content position ── */
+function openDrawer(idx) {
+  if (idx !== undefined) currentIdx = idx;
+  document.getElementById('detailDrawer').classList.add('open');
+  document.getElementById('mainContent').classList.add('drawer-open');
+  document.getElementById('toast').classList.add('drawer-open-toast');
+  updateDrawerNav();
+}
+
+/* ── Close drawer ── */
+function closeDrawer() {
+  document.getElementById('detailDrawer').classList.remove('open');
+  document.getElementById('mainContent').classList.remove('drawer-open');
+  document.getElementById('toast').classList.remove('drawer-open-toast');
+  rows.forEach(r => r.classList.remove('selected'));
+}
+
+/* ── Navigate drawer prev/next ── */
+function navigateDrawer(dir) {
+  const next = currentIdx + dir;
+  if (next < 0 || next >= rows.length) return;
+  selectRow(next);
+  // Scroll row into view
+  rows[next].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  // Update event ID in drawer header
+  const mono = rows[next].querySelector('.mono');
+  if (mono) document.getElementById('drawerEventId').textContent = mono.textContent;
+  showToast('Viewing ' + (mono ? mono.textContent : 'event'), 'ok');
+}
+
+/* ── Update prev/next button states ── */
+function updateDrawerNav() {
+  document.getElementById('drawerPrev').disabled = currentIdx === 0;
+  document.getElementById('drawerNext').disabled = currentIdx === rows.length - 1;
+  document.getElementById('drawerPos').textContent = (currentIdx + 1) + ' / ' + rows.length;
+}
+
+/* ── Keyboard shortcuts ── */
+document.addEventListener('keydown', e => {
+  const drawerOpen = document.getElementById('detailDrawer').classList.contains('open');
+  if (e.key === 'Escape' && drawerOpen) { closeDrawer(); return; }
+  if (drawerOpen) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); navigateDrawer(1); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); navigateDrawer(-1); }
+  }
+});
+
+/* ── Checkbox selection ── */
+document.querySelectorAll('td input[type="checkbox"]').forEach((cb, i) => {
+  if (i === 0) return; // skip header checkbox
+  const rowIdx = i - 1;
+  cb.addEventListener('change', function() {
+    if (this.checked) checkedRows.add(rowIdx);
+    else checkedRows.delete(rowIdx);
+    updateSelectionBar();
+  });
+});
+
+/* ── Header "select all" checkbox ── */
+const headerCb = document.querySelector('thead input[type="checkbox"]');
+if (headerCb) {
+  headerCb.addEventListener('change', function() {
+    const cbs = document.querySelectorAll('tbody input[type="checkbox"]');
+    cbs.forEach((cb, i) => {
+      cb.checked = this.checked;
+      if (this.checked) checkedRows.add(i);
+      else checkedRows.delete(i);
+    });
+    updateSelectionBar();
+  });
+}
+
+/* ── Update selection bar visibility ── */
+function updateSelectionBar() {
+  const bar = document.getElementById('selectionBar');
+  const countEl = document.getElementById('selCount');
+  if (checkedRows.size > 0) {
+    bar.classList.add('visible');
+    countEl.textContent = checkedRows.size;
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+/* ── Bulk clear ── */
+function bulkClear() {
+  const n = checkedRows.size;
+  showToast('✓ ' + n + ' event' + (n > 1 ? 's' : '') + ' cleared and logged', 'ok');
+  clearSelection();
+}
+
+/* ── Clear selection ── */
+function clearSelection() {
+  checkedRows.clear();
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  updateSelectionBar();
+}
+
+/* ── Toast with type ── */
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const dot = t.querySelector('.toast-dot');
+  document.getElementById('toast-msg').textContent = msg;
+  dot.className = 'toast-dot';
+  if (type === 'crit') dot.classList.add('crit');
+  else if (type === 'warn') dot.classList.add('warn');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── Severity pill toggle ── */
+document.querySelectorAll('.sev-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    this.classList.toggle('selected');
+  });
+});
+
+/* ── i18n — AR-43 / SIEM-35 / TKS-34 trilingual requirement ── */
+const translations = {
+  en: {
+    'nav.platform':'Platform', 'nav.auditReview':'Audit Review', 'nav.overview':'Overview',
+    'nav.certificates':'Certificates', 'nav.siemAlerts':'SIEM Alerts', 'nav.apmDashboards':'APM Dashboards',
+    'nav.ntpMonitor':'NTP Monitor', 'nav.onboarding':'Onboarding', 'nav.allBundles':'All Bundles',
+    'nav.registerBundle':'Register Bundle', 'nav.admin':'Admin', 'nav.userManagement':'User Management',
+    'nav.roles':'Roles & Permissions', 'nav.complianceReports':'Compliance Reports', 'nav.managementConsole':'Management Console',
+    'hero.title':'Audit Event Review',
+    'hero.desc':'Review and clear FHIR AuditEvent records for compliance. SHA-256 hash chaining ensures tamper-proof integrity. All actions are logged back into the repository.',
+    'btn.exportReport':'📄 Export Report', 'btn.downloadCrl':'⬇ Download CRL',
+    'stat.eventsToday':'Events Today', 'stat.facilities':'Facilities', 'stat.unreviewed':'Unreviewed',
+    'stat.flagged':'Flagged', 'stat.chainIntegrity':'Chain Integrity',
+    'filter.filters':'Filters', 'filter.dateTime':'Date & Time (UTC)', 'filter.severity':'Severity',
+    'filter.facility':'Facility', 'filter.reviewStatus':'Review Status', 'filter.purpose':'PDPA Purpose of Event',
+    'purpose.access':'PHI Access', 'purpose.clinical':'Clinical Decision', 'purpose.admin':'System Admin',
+    'purpose.audit':'Audit / Review', 'purpose.secops':'Security Ops', 'purpose.research':'Research (Anonymised)',
+    'purpose.etreat':'⚠ Break-Glass (Emergency)',
+    'breakglass.title':'Break-Glass (ETREAT) events require immediate review.',
+    'breakglass.desc':'Detection triggers an instant alert to the Privacy Officer, a mandatory post-hoc justification field, and a 24-hour review SLA.',
+    'breakglass.filter':'Filter ETREAT →',
+    'table.title':'AuditEvent Log',
+  },
+  si: {
+    'nav.platform':'වේදිකාව', 'nav.auditReview':'විගණන සමාලෝචනය', 'nav.overview':'දළ විශ්ලේෂණය',
+    'nav.certificates':'සහතික', 'nav.siemAlerts':'SIEM අනතුරු ඇඟවීම්', 'nav.apmDashboards':'APM උපකරණ පුවරු',
+    'nav.ntpMonitor':'NTP නිරීක්ෂණය', 'nav.onboarding':'ඇතුළත් කිරීම', 'nav.allBundles':'සියලුම බණ්ඩල්',
+    'nav.registerBundle':'බණ්ඩලය ලියාපදිංචි කරන්න', 'nav.admin':'පරිපාලනය', 'nav.userManagement':'පරිශීලක කළමනාකරණය',
+    'nav.roles':'භූමිකා සහ අවසර', 'nav.complianceReports':'අනුකූලතා වාර්තා', 'nav.managementConsole':'කළමනාකරණ කොන්සෝලය',
+    'hero.title':'විගණන සිදුවීම් සමාලෝචනය',
+    'hero.desc':'අනුකූලතාව සඳහා FHIR AuditEvent වාර්තා සමාලෝචනය කර නිරාකරණය කරන්න. SHA-256 හෑෂ් දාමකරණය අනිටැම්පර් අඛණ්ඩතාව සහතික කරයි.',
+    'btn.exportReport':'📄 වාර්තාව අපනයනය', 'btn.downloadCrl':'⬇ CRL බාගන්න',
+    'stat.eventsToday':'අද සිදුවීම්', 'stat.facilities':'රෝහල්', 'stat.unreviewed':'සමාලෝචනය නොකළ',
+    'stat.flagged':'සලකුණු කළ', 'stat.chainIntegrity':'දාම අඛණ්ඩතාව',
+    'filter.filters':'පෙරහන්', 'filter.dateTime':'දිනය සහ වේලාව (UTC)', 'filter.severity':'බරපතලකම',
+    'filter.facility':'රෝහල', 'filter.reviewStatus':'සමාලෝචන තත්ත්වය', 'filter.purpose':'PDPA සිදුවීමේ අරමුණ',
+    'purpose.access':'PHI ප්‍රවේශය', 'purpose.clinical':'සායනික තීරණය', 'purpose.admin':'පද්ධති පරිපාලනය',
+    'purpose.audit':'විගණන සමාලෝචනය', 'purpose.secops':'ආරක්ෂක මෙහෙයුම්', 'purpose.research':'පර්යේෂණ (අනාමික)',
+    'purpose.etreat':'⚠ හදිසි ප්‍රවේශය (Break-Glass)',
+    'breakglass.title':'හදිසි ප්‍රවේශ (ETREAT) සිදුවීම් වහාම සමාලෝචනය කළ යුතුය.',
+    'breakglass.desc':'අනාවරණය වහාම රහස්‍යතා නිලධාරියාට අනතුරු ඇඟවීමක් යවයි, පසු-යුක්තිකරණ ක්ෂේත්‍රයක් අවශ්‍ය කරයි, සහ පැය 24 ක සමාලෝචන කාලසීමාවක් ඇත.',
+    'breakglass.filter':'ETREAT පෙරහන →',
+    'table.title':'AuditEvent ලේඛනය',
+  },
+  ta: {
+    'nav.platform':'தளம்', 'nav.auditReview':'தணிக்கை மறுஆய்வு', 'nav.overview':'கண்ணோட்டம்',
+    'nav.certificates':'சான்றிதழ்கள்', 'nav.siemAlerts':'SIEM எச்சரிக்கைகள்', 'nav.apmDashboards':'APM டாஷ்போர்டுகள்',
+    'nav.ntpMonitor':'NTP கண்காணிப்பு', 'nav.onboarding':'இணைப்பு', 'nav.allBundles':'அனைத்து தொகுப்புகள்',
+    'nav.registerBundle':'தொகுப்பைப் பதிவு செய்யவும்', 'nav.admin':'நிர்வாகம்', 'nav.userManagement':'பயனர் மேலாண்மை',
+    'nav.roles':'பாத்திரங்கள் & அனுமதிகள்', 'nav.complianceReports':'இணக்க அறிக்கைகள்', 'nav.managementConsole':'மேலாண்மை பணியகம்',
+    'hero.title':'தணிக்கை நிகழ்வு மறுஆய்வு',
+    'hero.desc':'இணக்கத்திற்காக FHIR AuditEvent பதிவுகளை மறுஆய்வு செய்து அனுமதிக்கவும். SHA-256 ஹாஷ் சங்கிலி கண்ணிமையின்மையை உறுதி செய்கிறது.',
+    'btn.exportReport':'📄 அறிக்கையை ஏற்றுமதி செய்', 'btn.downloadCrl':'⬇ CRL பதிவிறக்கு',
+    'stat.eventsToday':'இன்றைய நிகழ்வுகள்', 'stat.facilities':'வசதிகள்', 'stat.unreviewed':'மறுஆய்வு செய்யாதவை',
+    'stat.flagged':'கொடியிடப்பட்டவை', 'stat.chainIntegrity':'சங்கிலி ஒருமைப்பாடு',
+    'filter.filters':'வடிகட்டிகள்', 'filter.dateTime':'தேதி & நேரம் (UTC)', 'filter.severity':'தீவிரம்',
+    'filter.facility':'வசதி', 'filter.reviewStatus':'மறுஆய்வு நிலை', 'filter.purpose':'PDPA நிகழ்வின் நோக்கம்',
+    'purpose.access':'PHI அணுகல்', 'purpose.clinical':'மருத்துவ முடிவு', 'purpose.admin':'கணினி நிர்வாகம்',
+    'purpose.audit':'தணிக்கை / மறுஆய்வு', 'purpose.secops':'பாதுகாப்பு செயல்பாடுகள்', 'purpose.research':'ஆராய்ச்சி (அநாமதேயம்)',
+    'purpose.etreat':'⚠ அவசர அணுகல் (Break-Glass)',
+    'breakglass.title':'அவசர அணுகல் (ETREAT) நிகழ்வுகளுக்கு உடனடி மறுஆய்வு தேவை.',
+    'breakglass.desc':'கண்டறிதல் தனியுரிமை அதிகாரிக்கு உடனடி எச்சரிக்கையைத் தூண்டுகிறது, கட்டாய நியாயப்படுத்தல் புலம் தேவை, 24 மணி நேர மறுஆய்வு காலவரையறை.',
+    'breakglass.filter':'ETREAT வடிகட்டு →',
+    'table.title':'AuditEvent பதிவு',
+  },
+};
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    const isActive = b.dataset.lang === lang;
+    b.classList.toggle('active', isActive);
+    b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+  document.documentElement.setAttribute('lang', lang);
+}
+
+/* ── Init ── */
+selectRow(0);
+openDrawer(0);
+updateDrawerNav();
+</script>
+
+</body>
+</html>
